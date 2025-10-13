@@ -1268,9 +1268,10 @@
         function calculateHourlyRate(basePay, isRegularPay) {
             let rateBasis = basePay;
             if (isRegularPay) {
-                // 가정: 통상 임금에 포함되는 수당 (예시로 200만원)
-                // TODO: 이 값을 설정에서 받을 수 있도록 확장 가능
-                rateBasis += 2000000; 
+                // 수정: 통상임금에 포함되는 연간 200만원 수당을 월로 나누어 합산합니다.
+                // (기본급 + (2000000 / 12)) / 226 = 통상임금 적용된 시급
+                const ANNUAL_REGULAR_BONUS = 2000000; 
+                rateBasis += (ANNUAL_REGULAR_BONUS / 12); 
             }
             return rateBasis / 226;
         }

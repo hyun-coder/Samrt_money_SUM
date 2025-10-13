@@ -1,3 +1,4 @@
+월급 계산 V1.4 [코드]
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -424,11 +425,13 @@
             border-collapse: collapse;
         }
         
+        /* 수정 2: 통계 테이블 셀 패딩 조정 */
         .stats-table th, .stats-table td {
-            padding: 10px;
+            padding: 8px 5px; /* 패딩을 줄여서 공간 확보 */
             text-align: left;
             border-bottom: 1px solid var(--color-disabled);
             font-size: 0.9em;
+            white-space: nowrap; /* 셀 내용이 두 줄이 되는 현상 방지 */
         }
         
         .stats-table th {
@@ -438,6 +441,12 @@
         
         .stats-summary-row {
             background-color: var(--color-bg-dark);
+        }
+
+        /* 수정 1: 설정 섹션 내 small 태그 텍스트 색상 변경 */
+        #tab-content-settings small {
+            color: var(--color-text-light) !important; /* 밝은 색으로 변경 */
+            opacity: 0.7;
         }
         
         /* 초기 설정 모달 */
@@ -485,7 +494,7 @@
                 <section id="salary-input-section">
                     <div class="salary-summary-header">
                         <div>
-                            <small id="salary-period-info">총 예상 월급 (20일 ~ 익월 19일)</small>
+                            <small id="salary-period-info">총 예상 월급 (기간 정보 로딩 중...)</small>
                             <h2 id="total-expected-salary">0 원</h2>
                         </div>
                         <button id="toggle-salary-details" onclick="toggleSalaryDetails()">▼</button>
@@ -526,7 +535,7 @@
                         </div>
                         <div class="checkbox-group">
                             <label for="regular-pay-check">통상임금 포함 (잔업 시급 계산에 반영)</label>
-                            <input type="checkbox" id="regular-pay-check" onchange="saveSettings(); updateSalary();">
+                            <input type="checkbox" id="regular-pay-check" onchange="saveRegularPayCheckSetting()">
                         </div>
                         
                         <hr style="border-color: var(--color-disabled); margin: 10px 0;">
@@ -561,7 +570,8 @@
                                 <th>주간</th>
                                 <th>야간</th>
                                 <th>특근</th>
-                                <th>휴가</th> <th>총 잔업</th>
+                                <th>휴가</th>
+                                <th>잔업(h)</th>
                             </tr>
                         </thead>
                         <tbody id="stats-table-body">
@@ -588,7 +598,7 @@
                     <div class="form-row">
                         <label for="setting-a-night">A반 야간 시작일 (기준일)</label>
                         <input type="date" id="setting-a-night" onchange="saveSettings(); generateCalendar();">
-                        <small style="color: var(--color-disabled);">* 이 날짜를 기준으로 반별 야간 로테이션이 계산됩니다.</small>
+                        <small>* 이 날짜를 기준으로 반별 야간 로테이션이 계산됩니다.</small>
                     </div>
                     
                     <hr style="border-color: var(--color-disabled); margin: 20px 0;">
@@ -674,7 +684,7 @@
             <div class="form-row">
                 <label for="init-a-night">A반 야간 로테이션 시작일 (YYYY-MM-DD)</label>
                 <input type="date" id="init-a-night" value="2025-10-05">
-                <small style="color: var(--color-disabled);">* 예시: 2025년 10월 5일 (B반 야간 시작 2025/10/12 기준)</small>
+                <small>* 예시: 2025년 10월 5일 (B반 야간 시작 2025/10/12 기준)</small>
             </div>
             <div class="modal-actions">
                 <button onclick="completeInitialSetup()" class="primary" style="width: 100%;">설정 완료 및 시작</button>
@@ -694,8 +704,9 @@
             class: 'A',
             A_night_start: '2025-10-05', // 초기값: 2025/10/12 B반 야간 시작이 되도록 A반 시작일 설정
             settings: {
-                basePays: {}, // 변경: 기간별 기본급을 저장하는 객체
-                isRegularPay: false,
+                basePays: {}, // 기간별 기본급을 저장하는 객체
+                // 수정된 부분: isRegularPay 대신 기간별 체크 상태 저장
+                regularPayChecks: {}, // 기간별 통상임금 체크 상태
                 additionalItems: [],
                 customHolidays: [],
                 isSalaryDetailsCollapsed: false, 
@@ -736,12 +747,40 @@
 
             const idParts = activeMonthElement.id.split('-');
             const activeYear = Number(idParts[1]);
-            const activeMonth = Number(idParts[2]);
+            const activeMonthIndex = Number(idParts[2]); // 0-11
             
-            // 활성화된 달력의 20일을 기준으로 Period Key 계산 (20일이 급여 시작일)
-            const dateOn20th = new Date(activeYear, activeMonth, 20); 
-            return getPeriodKeyFromDate(dateOn20th);
+            // **수정 3 적용**: 활성화된 달력의 '월'을 기준으로 해당 월 1일로 날짜 객체를 생성
+            const dateOn1st = new Date(activeYear, activeMonthIndex, 1); 
+            // 그 날짜를 기준으로 Period Key를 계산합니다. (1일이 20일보다 작으므로 이전 달 기준으로 나옴)
+            return getPeriodKeyFromDate(dateOn1st);
         }
+        
+        // 급여 기간의 시작일과 종료일을 반환
+        function getSalaryPeriodByPeriodKey(periodKey) {
+            if (!periodKey) return null;
+            const [periodYear, periodMonth] = periodKey.split('-').map(Number); // periodMonth는 1-12
+
+            const startDay = 20;
+            const endDay = 19;
+            
+            // 시작일: periodMonth - 1 (JS 월 인덱스는 0-11), 20일
+            const startDate = new Date(periodYear, periodMonth - 1, startDay); 
+            
+            // 종료일: periodMonth (다음 달), 19일
+            let endMonthIndex = periodMonth; // 1-12
+            let endYear = periodYear;
+            
+            if (endMonthIndex > 11) { // 12월 다음은 해가 바뀜
+                endMonthIndex = 0;
+                endYear++;
+            }
+            // new Date(year, monthIndex, date)에서 monthIndex는 0부터 시작
+            const endDate = new Date(endYear, endMonthIndex, endDay);
+            endDate.setHours(23, 59, 59, 999);
+
+            return { startDate, endDate };
+        }
+
 
         // 현재 키를 기준으로 이전 기간 키를 반환
         function getPreviousPeriodKey(currentKey) {
@@ -776,6 +815,18 @@
                 if (!loadedData.settings.basePays) {
                     loadedData.settings.basePays = {};
                 }
+                
+                // 수정된 부분: isRegularPay 단일 값 -> regularPayChecks 객체로 마이그레이션
+                if (loadedData.settings.isRegularPay !== undefined && loadedData.settings.regularPayChecks === undefined) {
+                    const today = new Date();
+                    const currentKey = getPeriodKeyFromDate(today);
+                    loadedData.settings.regularPayChecks = { [currentKey]: loadedData.settings.isRegularPay };
+                    delete loadedData.settings.isRegularPay;
+                }
+                if (!loadedData.settings.regularPayChecks) {
+                    loadedData.settings.regularPayChecks = {};
+                }
+
 
                 USER_DATA = loadedData;
                 
@@ -795,7 +846,7 @@
 
                 // HTML 요소에 로드된 설정 값 반영
                 // document.getElementById('base-pay').value 는 updateSalary() 에서 처리
-                document.getElementById('regular-pay-check').checked = USER_DATA.settings.isRegularPay;
+                // document.getElementById('regular-pay-check').checked 는 updateSalary() 에서 처리
                 document.getElementById('setting-account').value = USER_DATA.account;
                 document.getElementById('setting-class').value = USER_DATA.class;
                 document.getElementById('setting-a-night').value = USER_DATA.A_night_start;
@@ -822,6 +873,7 @@
 
             } else {
                 USER_DATA.settings.basePays = {}; // 초기화
+                USER_DATA.settings.regularPayChecks = {}; // 추가 초기화
                 document.getElementById('initial-setup-modal').style.display = 'flex';
             }
         }
@@ -836,19 +888,31 @@
                 updateSalary();
             }
         }
+        
+        // 추가된 함수: 통상임금 체크박스 상태 저장 함수
+        function saveRegularPayCheckSetting() {
+            const currentKey = getCurrentActivePeriodKey();
+            const isChecked = document.getElementById('regular-pay-check').checked;
+            if (currentKey) {
+                USER_DATA.settings.regularPayChecks[currentKey] = isChecked;
+                saveData();
+                updateSalary(); // 달력 리렌더링 없이 급여만 업데이트
+            }
+        }
 
-        // 기본 설정 저장 함수 (기본급 제외)
+
+        // 기본 설정 저장 함수 (기본급, 통상임금 제외)
         function saveSettings() {
             // basePay는 saveBasePaySetting()에서 처리
+            // isRegularPay는 saveRegularPayCheckSetting()에서 처리
 
-            USER_DATA.settings.isRegularPay = document.getElementById('regular-pay-check').checked;
-            
             USER_DATA.class = document.getElementById('setting-class').value;
             USER_DATA.A_night_start = document.getElementById('setting-a-night').value;
 
             saveData();
             updateSalary();
-            generateCalendar(false);
+            // 수정된 부분: generateCalendar() 호출 삭제 (A_night_start 변경 시에만 호출되도록 함)
+            // generateCalendar(false); 
         }
 
         function saveData() {
@@ -1038,15 +1102,11 @@
                         let isSalaryPeriod = false;
                         const currentDay = new Date(dateStr);
                         
-                        // 현재 날짜가 속한 급여 기간의 시작일과 종료일 계산
+                        // 현재 날짜가 속한 급여 기간의 키를 얻고, 해당 기간의 시작일과 종료일 계산
                         const periodKey = getPeriodKeyFromDate(currentDay);
-                        const [periodYear, periodMonth] = periodKey.split('-').map(Number);
-                        const periodStart = new Date(periodYear, periodMonth - 1, 20);
-                        const periodEnd = new Date(periodYear, periodMonth, 19);
-                        periodEnd.setHours(23, 59, 59, 999);
-
-
-                        if (currentDay >= periodStart && currentDay <= periodEnd) {
+                        const periodDates = getSalaryPeriodByPeriodKey(periodKey);
+                        
+                        if (periodDates && currentDay >= periodDates.startDate && currentDay <= periodDates.endDate) {
                             isSalaryPeriod = true;
                         }
 
@@ -1147,7 +1207,7 @@
 
             title.textContent = `${dateStr} 근무 기록`;
             dateInput.value = dateStr;
-            deleteBtn.style.display = record ? 'inline-block' : 'none';
+            deleteBtn.style.display = record ? 'inline-block' : 'none'; // 기록이 있을 때 삭제 버튼 표시
 
             const workType = record ? record.type : '미선택';
             const typeId = `type-${workType.replace(/주간특근/, '주특').replace(/야간특근/, '야특').replace(/17시퇴근/, '17시')}`;
@@ -1264,7 +1324,7 @@
         }
 
         // 6. 급여 계산 로직
-        // 기본급을 인수로 받도록 수정
+        // 기본급과 통상임금 체크 상태를 인수로 받도록 수정
         function calculateHourlyRate(basePay, isRegularPay) {
             let rateBasis = basePay;
             if (isRegularPay) {
@@ -1276,10 +1336,10 @@
             return rateBasis / 226;
         }
 
-        function calculateDailyPay(dateStr, workRecord, settings, currentBasePay) { // 기본급을 인수로 받음
+        function calculateDailyPay(dateStr, workRecord, settings, currentBasePay, isRegularPay) { // 통상임금 여부를 인수로 추가
             if (!workRecord || workRecord.type === '미선택') return 0;
 
-            const hourlyRate = calculateHourlyRate(currentBasePay, settings.isRegularPay); // period-specific basePay 사용
+            const hourlyRate = calculateHourlyRate(currentBasePay, isRegularPay); // period-specific basePay와 isRegularPay 사용
             let totalDailyAllowance = 0;
             let totalOvertimeHours = workRecord.totalOvertime || 0;
 
@@ -1320,49 +1380,30 @@
             return totalDailyAllowance;
         }
 
-        function getSalaryPeriod(activeYear, activeMonth) {
-            const startDay = 20;
-            const endDay = 19;
-
-            let startMonth = activeMonth;
-            let startYear = activeYear;
-            let endMonth = activeMonth + 1;
-            let endYear = activeYear;
-
-            if (endMonth > 11) {
-                endMonth = 0;
-                endYear++;
-            }
-
-            const startDate = new Date(startYear, startMonth, startDay);
-            const endDate = new Date(endYear, endMonth, endDay);
-            endDate.setHours(23, 59, 59, 999);
-
-            return { startDate, endDate };
-        }
 
         function updateSalary() {
-            const activeMonthElement = document.querySelector('.calendar-month.active');
-            if (!activeMonthElement) {
+            const currentPeriodKey = getCurrentActivePeriodKey(); // 현재 활성화된 달력을 기준으로 키 획득
+            
+            if (!currentPeriodKey) {
                 document.getElementById('total-expected-salary').textContent = "0 원";
                 document.getElementById('current-salary-options').textContent = '달력 활성화를 기다리는 중...';
                 return;
             }
 
-            const idParts = activeMonthElement.id.split('-');
-            const activeYear = Number(idParts[1]);
-            const activeMonth = Number(idParts[2]);
-
-            const { startDate, endDate } = getSalaryPeriod(activeYear, activeMonth);
-            const currentPeriodKey = getCurrentActivePeriodKey(); // 현재 활성화된 기간 키
+            const { startDate, endDate } = getSalaryPeriodByPeriodKey(currentPeriodKey); // 키를 이용해 기간 계산
 
             // 1. 기간별 기본급 로드 및 UI 반영
             const settings = USER_DATA.settings;
             const currentBasePay = settings.basePays[currentPeriodKey] || 0;
             const basePayInput = document.getElementById('base-pay');
             basePayInput.value = currentBasePay > 0 ? currentBasePay : '';
+            
+            // 수정된 부분: 기간별 통상임금 체크 상태 로드 및 UI 반영
+            const isRegularPayChecked = settings.regularPayChecks[currentPeriodKey] || false;
+            document.getElementById('regular-pay-check').checked = isRegularPayChecked;
 
 
+            // ⭐ 수정 3: 기간 정보 표시
             const startMonth = startDate.getMonth() + 1;
             const endMonth = endDate.getMonth() + 1;
             document.getElementById('salary-period-info').textContent = `총 예상 월급 (${startDate.getFullYear()}/${startMonth}월 20일 ~ ${endDate.getFullYear()}/${endMonth}월 19일)`;
@@ -1380,7 +1421,7 @@
             let specialDayAmount = 0; 
             let nightDayAmount = 0;
             
-            const hourlyRate = calculateHourlyRate(currentBasePay, settings.isRegularPay); // period-specific basePay 사용
+            const hourlyRate = calculateHourlyRate(currentBasePay, isRegularPayChecked); // period-specific basePay와 isRegularPayChecked 사용
 
             for (const dateStr in USER_DATA.workRecords) {
                 const date = new Date(dateStr);
@@ -1391,7 +1432,8 @@
                         hasWorkRecordInPeriod = true;
                     }
 
-                    const dailyAllowance = calculateDailyPay(dateStr, record, settings, currentBasePay); // period-specific basePay 전달
+                    // period-specific basePay와 isRegularPayChecked 전달
+                    const dailyAllowance = calculateDailyPay(dateStr, record, settings, currentBasePay, isRegularPayChecked); 
                     totalExpectedSalary += dailyAllowance;
 
                     let totalOvertimeHours = record.totalOvertime || 0;
@@ -1445,7 +1487,7 @@
 
             // 기본급 및 통상임금 정보를 업데이트
             document.getElementById('current-salary-options').innerHTML = `
-                시급 계산 기준: <b>${settings.isRegularPay ? '통상임금 포함' : '기본급만'}</b> / 예상 시급: <b>${Math.round(hourlyRate).toLocaleString('ko-KR', { maximumFractionDigits: 0 })} 원</b>
+                시급 계산 기준: <b>${isRegularPayChecked ? '통상임금 포함' : '기본급만'}</b> / 예상 시급: <b>${Math.round(hourlyRate).toLocaleString('ko-KR', { maximumFractionDigits: 0 })} 원</b>
             `;
         }
 
@@ -1607,6 +1649,8 @@
 
                 if (!statsByPeriod[periodKey]) {
                     const periodBasePay = USER_DATA.settings.basePays[periodKey] || 0; // 해당 기간의 기본급 로드
+                    const isRegularPay = USER_DATA.settings.regularPayChecks[periodKey] || false; // 해당 기간의 통상임금 체크 상태 로드
+                    
                     // 6. 기본급과 추가 수당은 기간당 한 번만 합산 (여기서는 0으로 시작)
                     statsByPeriod[periodKey] = {
                         'baseAndAdditional': periodBasePay + USER_DATA.settings.additionalItems.reduce((sum, item) => sum + item.amount, 0),
@@ -1617,14 +1661,15 @@
                         '휴가': 0,
                         '반차': 0,
                         '총 잔업': 0,
-                        'basePayForRate': periodBasePay // 시급 계산을 위한 기본급 저장
+                        'basePayForRate': periodBasePay, // 시급 계산을 위한 기본급 저장
+                        'isRegularPay': isRegularPay // 시급 계산을 위한 통상임금 체크 상태 저장
                     };
                 }
 
                 const stats = statsByPeriod[periodKey];
                 
-                // 해당 기간의 기본급을 사용하여 calculateDailyPay 호출
-                const dailyAllowance = calculateDailyPay(dateStr, record, USER_DATA.settings, stats['basePayForRate']); 
+                // 해당 기간의 기본급과 통상임금 체크 상태를 사용하여 calculateDailyPay 호출
+                const dailyAllowance = calculateDailyPay(dateStr, record, USER_DATA.settings, stats['basePayForRate'], stats['isRegularPay']); 
                 stats['dailyAllowance'] += dailyAllowance; // 수당만 합산 (기본급 제외)
 
                 switch (record.type) {
@@ -1651,7 +1696,7 @@
 
             // ⭐ 4. 통계 필터 업데이트: 기록된 기간만 표시
             const periodYears = Array.from(new Set(Array.from(recordedPeriods).map(p => p.split('-')[0]))).sort((a, b) => b - a);
-            const periodMonths = Array.from(new Set(Array.from(recordedPeriods).map(p => p.split('-')[1]))).sort((a, b) => a - b);
+            const recordedMonths = Array.from(new Set(Array.from(recordedPeriods).map(p => p.split('-')[1]))).sort((a, b) => a - b);
 
             const selectedYear = yearFilterEl.value;
             const selectedMonth = monthFilterEl.value;
@@ -1665,7 +1710,7 @@
 
 
             // 월 필터 옵션 채우기 (전체 + 기록된 월)
-            monthFilterEl.innerHTML = `<option value="">전체 월</option>` + periodMonths.map(m => {
+            monthFilterEl.innerHTML = `<option value="">전체 월</option>` + recordedMonths.map(m => {
                 const monthName = Number(m) + '월';
                 // 월 필터 값은 0부터 시작하는 month index 대신 1부터 시작하는 month number를 사용
                 return `<option value="${Number(m)}" ${m == selectedMonth ? 'selected' : ''}>${monthName}</option>`;
@@ -1698,7 +1743,7 @@
                 // 기본급이 0보다 큰 경우에만 baseAndAdditional 합산
                 const totalAmount = stats['dailyAllowance'] + (stats['basePayForRate'] > 0 ? stats['baseAndAdditional'] : 0); 
 
-                row.insertCell().textContent = `${year}년 ${Number(month)}월분`;
+                row.insertCell().textContent = `${year}/${Number(month)}`;
                 // ⭐ 1. 총액 소수점 반올림
                 row.insertCell().textContent = Math.round(totalAmount).toLocaleString('ko-KR') + "원"; 
                 row.insertCell().textContent = stats['주간'] + (stats['주간'] > 0 ? '일' : '');

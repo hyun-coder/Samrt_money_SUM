@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스마트 월급 계산 Ver.2.0.3 [GD시큐어]</title>
+    <title>스마트 월급 계산 Ver.2.0.5 [GD시큐어]</title>
     <style>
         /* === 1. 다크 모드 및 기본 스타일 === */
         :root {
@@ -359,7 +359,7 @@
 
 
     <script>
-        const CURRENT_APP_VERSION = "1.7.0";
+        const CURRENT_APP_VERSION = "2.0.5";
         const DEFAULT_OVERTIME_MAP = { '주간': 3.0, '야간': 4.5, '주간특근': 0.5, '야간특근': 7.0, '17시퇴근': 0.5 };
         
         // 💡 Fix 1: 기본 공휴일 데이터를 상수로 분리하여 localStorage에 의해 덮어쓰이지 않도록 보장
@@ -485,7 +485,13 @@
             const period = getSalaryPeriodByPeriodKey(periodKey);
             if (!period) return stats;
 
-            const standardMonthlyHours = 226;
+            // 💡 1. D반 209시간 적용 (수정됨)
+            // 해당 급여 기간의 시작일을 기준으로 반(Class)을 확인합니다.
+            const currentClass = getClassForDate(period.startDate);
+            // D반일 경우 209시간, 그 외에는 226시간을 적용합니다.
+            const standardMonthlyHours = (currentClass === 'D') ? 209 : 226; 
+            // 💡 수정 끝
+
             stats.basePay = USER_DATA.settings.basePays[periodKey] || 0;
             const isRegularPayChecked = USER_DATA.settings.regularPayChecks[periodKey] || false;
             
@@ -592,8 +598,13 @@
             }
             calendarView.removeEventListener('scroll', updateActiveMonth);
             calendarView.addEventListener('scroll', updateActiveMonth);
-            if (scrollToToday && lastScrollMonthId) scrollToTodayMonth(lastScrollMonthId);
-            else updateActiveMonth();
+
+            // 💡 2. 달력 로딩 최적화 (수정됨)
+            if (scrollToToday && lastScrollMonthId) {
+                scrollToTodayMonth(lastScrollMonthId, true); // 💡 'true' 플래그 전달
+            } else {
+                updateActiveMonth();
+            }
         };
         const updateDayCell = (dateStr, cell) => {
             const dayCell = cell || document.querySelector(`.day-cell[data-date="${dateStr}"]`);
@@ -783,13 +794,24 @@
         const toggleTheme = (isLight) => { USER_DATA.settings.isLightMode = isLight; saveData(); applyTheme(isLight); };
         const applyTheme = (isLight) => document.documentElement.classList.toggle('light-mode', isLight);
         
-        const scrollToTodayMonth = (id = null) => { 
+        // 💡 2. 달력 로딩 최적화 (수정됨)
+        const scrollToTodayMonth = (id = null, isInitialLoad = false) => { // isInitialLoad 플래그 추가
             const today = new Date(); 
             const monthId = id || `month-${today.getFullYear()}-${today.getMonth()}`; 
             const el = document.getElementById(monthId); 
             if (el) { 
                 el.scrollIntoView({ behavior: 'auto', block: 'start' }); 
-                setTimeout(() => updateActiveMonth(), 50); 
+
+                if (isInitialLoad) {
+                    // 초기 로딩 시, 지연 없이 바로 활성 월을 설정하고 UI를 로드합니다.
+                    clearTimeout(scrollTimeout); // 스크롤 이벤트 핸들러가 겹치지 않도록 방지
+                    document.querySelectorAll('.calendar-month').forEach(m => m.classList.remove('active'));
+                    el.classList.add('active');
+                    loadPeriodSettingsToUI();
+                } else {
+                    // 사용자가 '오늘' 버튼을 클릭해 스크롤할 경우, 50ms 후 스크롤 이벤트 핸들러를 트리거합니다.
+                    setTimeout(() => updateActiveMonth(), 50); 
+                }
             } 
         };
 
@@ -798,7 +820,7 @@
             document.getElementById('tab-calendar').addEventListener('click', () => switchTab('calendar'));
             document.getElementById('tab-statistics').addEventListener('click', () => switchTab('statistics'));
             document.getElementById('tab-settings').addEventListener('click', () => switchTab('settings'));
-            document.getElementById('today-button').addEventListener('click', () => scrollToTodayMonth());
+            document.getElementById('today-button').addEventListener('click', () => scrollToTodayMonth()); // 💡 플래그 없이 호출 (isInitialLoad = false)
             document.getElementById('work-type-group').addEventListener('change', () => document.getElementById('modal-overtime-list').innerHTML = ''); 
             loadData();
         });

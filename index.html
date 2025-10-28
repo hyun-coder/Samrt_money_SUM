@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스마트 월급 계산 Ver.2.0.6 [GD시큐어]</title>
+    <title>스마트 월급 계산 Ver.2.0.4 [GD시큐어]</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="월급 계산기">
+    <meta name="theme-color" content="#00BFFF">
+
     <style>
         /* === 1. 다크 모드 및 기본 스타일 === */
         :root {
@@ -190,7 +197,7 @@
 
     <div class="app-container">
         <header class="header">
-            <h1 id="app-title">월급 계산</h1>
+            <h1 id="app-title">스마트 월급 계산</h1>
             <button id="today-button" class="float-button" title="오늘 날짜로 이동" style="bottom: auto; top: 10px; right: 10px; width: 40px; height: 40px; font-size: 1.2em;">📅</button>
         </header>
 
@@ -362,7 +369,7 @@
 
 
     <script>
-        const CURRENT_APP_VERSION = "2.0.6";
+        const CURRENT_APP_VERSION = "2.0.5";
         const DEFAULT_OVERTIME_MAP = { '주간': 3.0, '야간': 4.5, '주간특근': 0.5, '야간특근': 7.0, '17시퇴근': 0.5 };
         
         // 💡 Fix 1: 기본 공휴일 데이터를 상수로 분리하여 localStorage에 의해 덮어쓰이지 않도록 보장
@@ -841,6 +848,107 @@
             } 
         };
 
+        // --- PWA: Inlined Manifest & Service Worker Registration ---
+        
+        // 1. Inlined Manifest Data
+        const MANIFEST_JSON = {
+            "name": "스마트 월급 계산기",
+            "short_name": "월급 계산기",
+            "description": "GD시큐어 스마트 월급 계산기 - 오프라인 지원",
+            "start_url": "./test-1 44.html", // 파일 이름에 맞게 수정
+            "display": "standalone",
+            "background_color": "#1E1E1E", // Dark Mode Surface Color
+            "theme_color": "#00BFFF", // Primary Color
+            "icons": [
+                {
+                    "src": "https://dummy.com/icon-192.png", // 더미 경로
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://dummy.com/icon-512.png", // 더미 경로
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+
+        // 2. Service Worker Content (sw.js의 역할)
+        const SW_CONTENT = `
+            const CACHE_NAME = 'smart-salary-cache-v${CURRENT_APP_VERSION.replace(/\./g, '')}';
+            const urlsToCache = [
+                './test-1 44.html', // 현재 파일 자체
+                '/', // 루트 경로도 캐시
+                // 필요한 경우 여기에 추가 리소스 (아이콘 파일 등) 경로를 추가
+            ];
+
+            // PWA Manifest 요청을 가로채서 인라인 JSON을 반환
+            self.addEventListener('fetch', event => {
+                if (event.request.url.endsWith('/manifest.json')) {
+                    const manifestResponse = new Response(JSON.stringify(${JSON.stringify(MANIFEST_JSON)}), {
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    event.respondWith(manifestResponse);
+                    return;
+                }
+
+                // 나머지 리소스는 네트워크 우선 또는 캐시 우선 전략 사용
+                event.respondWith(
+                    caches.match(event.request).then(response => {
+                        return response || fetch(event.request);
+                    })
+                );
+            });
+
+            // 설치 시 캐시 저장
+            self.addEventListener('install', event => {
+                event.waitUntil(
+                    caches.open(CACHE_NAME).then(cache => {
+                        return cache.addAll(urlsToCache);
+                    })
+                );
+                self.skipWaiting();
+            });
+
+            // 활성화 시 이전 캐시 삭제
+            self.addEventListener('activate', event => {
+                const cacheWhitelist = [CACHE_NAME];
+                event.waitUntil(
+                    caches.keys().then(cacheNames => {
+                        return Promise.all(
+                            cacheNames.map(cacheName => {
+                                if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                    return caches.delete(cacheName);
+                                }
+                            })
+                        );
+                    })
+                );
+            });
+        `;
+
+        // 3. Service Worker Registration Logic
+        const registerServiceWorker = () => {
+            if ('serviceWorker' in navigator) {
+                try {
+                    // Blob을 생성하고 URL을 얻어 인라인 SW를 등록
+                    const blob = new Blob([SW_CONTENT], { type: 'application/javascript' });
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    navigator.serviceWorker.register(blobUrl, { scope: './' })
+                        .then(registration => {
+                            console.log('PWA ServiceWorker 등록 성공:', registration);
+                        })
+                        .catch(error => {
+                            console.error('PWA ServiceWorker 등록 실패:', error);
+                        });
+
+                } catch (error) {
+                    console.error('Service Worker Blob 생성 중 오류 발생:', error);
+                }
+            }
+        };
+
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tab-calendar').addEventListener('click', () => switchTab('calendar'));
@@ -849,6 +957,9 @@
             document.getElementById('today-button').addEventListener('click', () => scrollToTodayMonth()); // 💡 플래그 없이 호출 (isInitialLoad = false)
             document.getElementById('work-type-group').addEventListener('change', () => document.getElementById('modal-overtime-list').innerHTML = ''); 
             loadData();
+            
+            // PWA 기능 등록
+            registerServiceWorker(); 
         });
     </script>
 </body>

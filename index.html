@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🎅 Merry Christmas - 스마트 월급 계산 Premium [GD시큐어]</title>
+    <title>스마트 월급 계산 Premium [GD시큐어]</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,190 +12,40 @@
 <meta name="theme-color" content="#00BFFF">
 
 <style>
-    /* === 🎄 크리스마스 효과 CSS 시작 === */
-    body.christmas {
-        background: radial-gradient(ellipse at bottom, #00111a 0%, #002b40 100%);
-        background-attachment: fixed;
-    }
-    
-    :root.light-mode body.christmas {
-        background: var(--color-bg); 
-    }
+    /* === 💡 전역 설정 === */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; width: 100%; height: 100%; overflow-x: hidden; }
+    input, select { min-width: 0; }
 
-    /* 눈송이는 캔버스로 제어하므로 CSS 애니메이션 일부 제거/수정 */
-    .twinkle {
-        position: fixed;
-        border-radius: 50%;
-        background: white;
-        animation: twinkle 2s infinite ease-in-out;
-        opacity: 0;
-        z-index: 0; /* 캔버스 뒤, 배경 앞 */
-    }
-    @keyframes twinkle {
-        0%, 100% { opacity: 0; transform: scale(0.5); }
-        50% { opacity: 1; transform: scale(1.2); }
-    }
-    .banner {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        padding: 15px;
-        background: rgba(255,0,0,0.8);
-        color: #fff;
-        font-size: 1.5em;
-        font-weight: bold;
-        text-shadow: 2px 2px 8px #000;
-        animation: glow 2s ease-in-out infinite alternate;
-        z-index: 10000;
-        box-sizing: border-box;
-    }
-    @keyframes glow {
-        from { box-shadow: 0 0 10px #fff; }
-        to { box-shadow: 0 0 25px #ff0; }
-    }
-    #music-toggle {
-        position: fixed;
-        bottom: 20px;
-        left: 20px; 
-        background: rgba(255,255,255,0.2);
-        border: 1px solid #fff;
-        border-radius: 10px;
-        padding: 10px 15px;
-        color: #fff;
-        cursor: pointer;
-        z-index: 10000;
-        font-size: 0.9em;
-        transition: background-color 0.3s, transform 0.2s;
-    }
-    #music-toggle:hover {
-        background: rgba(255,255,255,0.3);
-        transform: scale(1.05);
-    }
-    #music-toggle.playing {
-        background: rgba(40, 167, 69, 0.8);
-        box-shadow: 0 0 15px #28a745;
-    }
-     /* === 🎄 크리스마스 효과 CSS 끝 === */
-
-
-    /* === 💡 1. 안정적인 레이아웃을 위한 전역 설정 === */
-    *, *::before, *::after {
-        box-sizing: border-box;
-    }
-
-    html {
-        -webkit-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-        width: 100%;
-        height: 100%;
-        overflow-x: hidden; 
-    }
-    
-    input, select {
-        min-width: 0;
-    }
-
-    /* === 1. 다크 모드 및 기본 스타일 === */
+    /* === 다크/라이트 모드 변수 === */
     :root {
-        --color-bg: #121212;
-        --color-surface: #1E1E1E;
-        --color-text: #E0E0E0;
-        --color-text-secondary: #AAAAAA;
-        --color-primary: #00BFFF;
-        --color-secondary: #FF6F00;
-        --color-error: #CF6679;
-        --color-highlight: rgba(0, 191, 255, 0.15);
-        --color-disabled: #383838;
-        --color-border: #444444;
-        --color-night-shift-dark: #2A3B4D;
-        --shadow-elevation: 0 4px 8px rgba(0, 0, 0, 0.5);
-        --mobile-padding: 16px;
+        --color-bg: #121212; --color-surface: #1E1E1E; --color-text: #E0E0E0; --color-text-secondary: #AAAAAA;
+        --color-primary: #00BFFF; --color-secondary: #FF6F00; --color-error: #CF6679;
+        --color-highlight: rgba(0, 191, 255, 0.15); --color-disabled: #383838; --color-border: #444444;
+        --color-night-shift-dark: #2A3B4D; --shadow-elevation: 0 4px 8px rgba(0, 0, 0, 0.5); --mobile-padding: 16px;
     }
-
     :root.light-mode {
-        --color-bg: #F5F5F5;
-        --color-surface: #FFFFFF;
-        --color-text: #212121;
-        --color-text-secondary: #757575;
-        --color-primary: #1976D2;
-        --color-secondary: #FFA000;
-        --color-error: #D32F2F;
-        --color-highlight: rgba(25, 118, 210, 0.1);
-        --color-disabled: #BDBDBD;
-        --color-border: #E0E0E0;
-        --color-night-shift-dark: #E3F2FD;
-        --shadow-elevation: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --color-bg: #F5F5F5; --color-surface: #FFFFFF; --color-text: #212121; --color-text-secondary: #757575;
+        --color-primary: #1976D2; --color-secondary: #FFA000; --color-error: #D32F2F;
+        --color-highlight: rgba(25, 118, 210, 0.1); --color-disabled: #BDBDBD; --color-border: #E0E0E0;
+        --color-night-shift-dark: #E3F2FD; --shadow-elevation: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+    body { background-color: var(--color-bg); color: var(--color-text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; width: 100%; overflow-x: hidden; position: relative; touch-action: pan-y; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
 
-    body {
-        color: var(--color-text); 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        width: 100%;
-        overflow-x: hidden; 
-        position: relative;
-        touch-action: pan-y;
-        -webkit-font-smoothing: antialiased;
-        word-break: keep-all;
-        overflow-wrap: break-word;
-    }
-
-    /* === 라이트 모드 특화 스타일 === */
+    /* === 라이트 모드 스타일 오버라이드 === */
     :root.light-mode .day-cell { background-color: #FAFAFA; }
     :root.light-mode .day-cell.disabled { background-color: #EEEEEE; color: var(--color-disabled); }
     :root.light-mode .day-cell.night-shift-background { background-color: var(--color-night-shift-dark); }
     :root.light-mode .day-cell.night-shift-background.disabled { background-color: #ECEFF1; }
-    :root.light-mode .input-group input,
-    :root.light-mode .input-group select,
-    :root.light-mode .overtime-input-row select,
-    :root.light-mode .overtime-input-row input,
-    :root.light-mode #stats-year-filter,
-    :root.light-mode #stats-month-filter,
-    :root.light-mode #overtime-list-container select {
-        background-color: #FFFFFF;
-        color: var(--color-text);
-        border: 1px solid var(--color-border);
-    }
+    :root.light-mode .input-group input, :root.light-mode .input-group select, :root.light-mode .overtime-input-row select, :root.light-mode .overtime-input-row input, :root.light-mode #stats-year-filter, :root.light-mode #stats-month-filter, :root.light-mode #overtime-list-container select { background-color: #FFFFFF; color: var(--color-text); border: 1px solid var(--color-border); }
     :root.light-mode .radio-group label { background-color: #EEEEEE; color: var(--color-text-secondary); }
     :root.light-mode .radio-group input[type="radio"]:checked + label { background-color: var(--color-primary); color: #FFFFFF; }
-    :root.light-mode .modal-actions button.primary { color: #FFFFFF; }
-    :root.light-mode .modal-actions button.secondary { background-color: #E0E0E0; color: #424242; }
-    :root.light-mode #tab-content-settings small { color: var(--color-text-secondary) !important; }
-    :root.light-mode button { color: var(--color-text); }
-    :root.light-mode button[onclick^="add"],
-    :root.light-mode button[onclick^="backup"],
-    :root.light-mode button[onclick*="restore"] { background-color: #E0E0E0; color: #424242; }
-    :root.light-mode button[onclick="copyPreviousMonthBasePay()"] { background-color: var(--color-secondary); color: #FFFFFF; }
-    :root.light-mode button[onclick="resetAllData()"] { background-color: var(--color-error); color: #FFFFFF; }
-    :root.light-mode .weekdays .saturday { color: var(--color-primary); }
+    :root.light-mode .sub-tab-button { background-color: #E0E0E0; color: #757575; }
+    :root.light-mode .sub-tab-button.active { background-color: var(--color-primary); color: #FFFFFF; }
 
-
-    /* === 레이아웃 및 탭 === */
-    .app-container { 
-        flex-grow: 1; 
-        display: flex; 
-        flex-direction: column; 
-        padding-top: 60px; 
-        width: 100%;
-        max-width: 100vw;
-        z-index: 10; /* 캔버스 위에 표시 */
-        position: relative;
-    }
-    .header { 
-        background-color: var(--color-surface); 
-        padding: 12px var(--mobile-padding); 
-        box-shadow: var(--shadow-elevation); 
-        position: sticky; 
-        top: 0; 
-        z-index: 100; 
-        width: 100%;
-    }
+    /* === 레이아웃 === */
+    .app-container { flex-grow: 1; display: flex; flex-direction: column; padding-top: 0; width: 100%; max-width: 100vw; z-index: 10; position: relative; }
+    .header { background-color: var(--color-surface); padding: 12px var(--mobile-padding); box-shadow: var(--shadow-elevation); position: sticky; top: 0; z-index: 100; width: 100%; }
     .header h1 { font-size: 1.4em; margin: 0; text-align: center; }
     .tab-bar { display: flex; justify-content: space-around; background-color: var(--color-surface); border-bottom: 1px solid var(--color-border); width: 100%; }
     .tab-button { flex: 1; padding: 12px 0; text-align: center; font-size: 1em; cursor: pointer; border: none; background: none; color: var(--color-text); opacity: 0.6; transition: opacity 0.3s, color 0.3s, border-bottom 0.3s; }
@@ -217,15 +67,14 @@
     #salary-details-container.collapsed { display: none; }
     #calculated-stats { background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important; }
     #calculated-stats .stats-row span:first-child { color: var(--color-text-secondary); }
-    .checkbox-group label { 
-        flex: 1 1 0%; 
-        font-size: 0.9em; 
-    } 
-    .checkbox-group .toggle-switch { 
-        flex: 0 0 50px;
-        min-width: 50px; 
-    }
+    .checkbox-group label { flex: 1 1 0%; font-size: 0.9em; } 
+    .checkbox-group .toggle-switch { flex: 0 0 50px; min-width: 50px; }
 
+    /* === 1월 분할 탭 스타일 === */
+    .sub-tab-container { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid var(--color-border); padding-bottom: 5px; }
+    .sub-tab-button { flex: 1; padding: 8px 5px; border: none; background-color: var(--color-disabled); color: var(--color-text-secondary); border-radius: 6px 6px 0 0; cursor: pointer; font-size: 0.8em; transition: all 0.2s; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub-tab-button.active { background-color: var(--color-primary); color: white; opacity: 1; font-weight: bold; box-shadow: 0 -2px 5px rgba(0,0,0,0.2); }
+    .active-period-indicator { text-align: right; font-size: 0.8em; color: var(--color-secondary); margin-bottom: 5px; font-weight: bold; }
 
     /* === 달력 섹션 === */
     #calendar-view { overflow-y: scroll; height: calc(100vh - 200px); scroll-snap-type: y mandatory; }
@@ -242,28 +91,13 @@
     :root:not(.light-mode) .day-cell.night-shift-background.disabled { background-color: #262626; opacity: 0.7; }
     .day-cell:not(.disabled):active { background-color: var(--color-highlight); }
     .day-number { font-weight: bold; margin-bottom: 2px; font-size: 1em; }
-    
-    .day-status { 
-        font-size: 0.7em; 
-        font-weight: 500; 
-        color: var(--color-primary); 
-        margin-bottom: 1px; 
-        line-height: 1; 
-        min-height: 0.8em; 
-        width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        text-align: center;
-        padding: 0 2px;
-    }
-    
+    .day-status { font-size: 0.7em; font-weight: 500; color: var(--color-primary); margin-bottom: 1px; line-height: 1; min-height: 0.8em; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; padding: 0 2px; }
     .day-overtime { font-size: 0.7em; color: var(--color-secondary); min-height: 0.8em; line-height: 1; }
     .holiday .day-number { color: var(--color-error); }
     .day-cell.disabled { color: var(--color-disabled); background-color: var(--color-surface); cursor: default; opacity: 0.6; }
     .today { border: 1px solid var(--color-secondary); }
 
-    /* === 모달 === */
+    /* === 모달 및 기타 === */
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 200; }
     .modal-content { background-color: var(--color-surface); padding: var(--mobile-padding); border-radius: 12px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: var(--shadow-elevation); }
     .modal-content h3 { margin-top: 0; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; color: var(--color-primary); }
@@ -281,45 +115,22 @@
     .modal-actions button.primary { background-color: var(--color-primary); color: var(--color-bg); }
     .modal-actions button.secondary { background-color: var(--color-disabled); color: var(--color-text); }
     .modal-actions button.danger { background-color: var(--color-error); color: #FFFFFF; }
-
-    /* === 기타 UI 요소 === */
     .float-button { position: fixed; bottom: 20px; right: 20px; background-color: var(--color-secondary); color: var(--color-bg); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5em; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-elevation); z-index: 150; }
     #statistics-view { padding: var(--mobile-padding); }
     .stats-filter { display: flex; gap: 10px; margin-bottom: 20px; }
     .stats-filter select { flex: 1; padding: 8px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg); color: var(--color-text); }
-    
-    .table-scroll-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .stats-table { 
-        width: 100%; 
-        border-collapse: collapse; 
-    }
-    .stats-table th, .stats-table td { 
-        padding: 12px 5px; 
-        text-align: left; 
-        border-bottom: 1px solid var(--color-border); 
-        font-size: 0.9em; 
-        white-space: nowrap; 
-    }
+    .table-scroll-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .stats-table { width: 100%; border-collapse: collapse; }
+    .stats-table th, .stats-table td { padding: 12px 5px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 0.9em; white-space: nowrap; }
     .stats-table th { color: var(--color-primary); font-weight: bold; }
     .stats-table td:not(:first-child), .stats-table th:not(:first-child) { text-align: right; }
-    
-    #tab-content-settings small { 
-        color: var(--color-text-secondary) !important; 
-        opacity: 1; 
-        white-space: pre-wrap;
-    }
+    #tab-content-settings small { color: var(--color-text-secondary) !important; opacity: 1; white-space: pre-wrap; }
     #initial-setup-modal .modal-content { width: 80%; }
     #initial-setup-modal input { width: 100%; }
     #overtime-list-container div, .change-record-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
     #overtime-list-container input, #overtime-list-container select { flex: 1; }
     .change-record-row select, .change-record-row input[type="date"] { flex: 1; }
     hr { border: none; border-top: 1px solid var(--color-border); }
-
-    /* === 토글 스위치 === */
     .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-disabled); transition: .4s; border-radius: 28px; }
@@ -327,11 +138,8 @@
     input:checked + .slider { background-color: var(--color-primary); }
     input:checked + .slider:before { transform: translateX(22px); }
 </style>
-
 </head>
-<body class="christmas">
-
-<div class="banner">🧑‍🎄🎄 Merry Christmas 🎄🤶 & 행복한 크리스마스 되길! 🎅</div>
+<body>
 
 <div class="app-container">
     <header class="header">
@@ -357,8 +165,12 @@
                 </div>
 
                 <div id="salary-details-container">
-                    <div id="current-salary-options" style="font-size:0.8em; color: var(--color-primary);"></div>
+                    <div id="january-split-tabs" style="display:none;"></div>
+                    
+                    <div id="current-salary-options" style="font-size:0.8em; color: var(--color-primary); white-space: pre-line;"></div>
+                    
                     <div id="calculated-stats" style="margin-top: 5px; margin-bottom: 15px; padding: 10px; border: 1px solid var(--color-disabled); border-radius: 4px; background-color: var(--color-bg);">
+                        <div class="active-period-indicator" id="stats-period-indicator" style="display:none;"></div>
                         <div class="stats-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                             <span style="flex: 2;">평일잔업시간:</span>
                             <span id="stat-weekday-ot-time-count" style="flex: 1; text-align: right; font-weight: bold; margin-right: 10px;">0.0h</span>
@@ -381,14 +193,13 @@
                         </div>
                     </div>
 
-                    <div class="input-group" style="margin-top: 10px;">
-                        <label for="base-pay">기본급 입력</label>
-                        <div style="display:flex; gap: 5px; flex: 3;">
-                            <input type="number" inputmode="decimal" id="base-pay" placeholder="기본급" oninput="saveBasePaySetting()" style="flex: 1;">
-                            <button onclick="copyPreviousMonthBasePay(); playSound('click');" style="background-color: var(--color-secondary); color: var(--color-bg); padding: 5px 10px; border: none; border-radius: 4px; font-size: 0.8em; line-height: 1.2; text-align: center; width: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer;">이전달<br>기본급</button>
-                        </div>
+                    <div class="input-group" style="margin-top: 10px; align-items: flex-start;">
+                        <label for="base-pay" id="base-pay-label" style="padding-top: 10px;">기본급 입력</label>
+                        <div id="base-pay-container" style="flex: 3;">
+                            </div>
                     </div>
-                    <div class="checkbox-group">
+
+                    <div class="checkbox-group" id="regular-pay-group">
                         <label for="regular-pay-check">통상임금 포함</label>
                         <label class="toggle-switch">
                             <input type="checkbox" id="regular-pay-check" onchange="saveRegularPayCheckSetting(); playSound('toggle');">
@@ -419,19 +230,17 @@
                         <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
                     </select>
                 </div>
-
                 <div class="table-scroll-wrapper">
                     <table class="stats-table">
                         <thead><tr><th>기간</th><th>총 급여</th><th>야간</th><th>특근</th><th>휴가/반차</th></tr></thead>
                         <tbody id="stats-table-body"></tbody>
                     </table>
                 </div>
-                
             </section>
         </div>
 
         <div id="tab-content-settings" class="tab-content" style="display:none;">
-            <section style="padding: var(--mobile-padding);">
+             <section style="padding: var(--mobile-padding);">
                 <h3>사용자 및 반 설정</h3>
                 <div class="form-row"><label for="setting-account">내 계정 정보 (기기당 고유)</label><input type="text" id="setting-account" disabled></div>
                 <div class="form-row">
@@ -461,14 +270,17 @@
                     <label for="theme-toggle">라이트 모드 활성화</label>
                      <label class="toggle-switch"><input type="checkbox" id="theme-toggle" onchange="toggleTheme(this.checked); playSound('toggle');"><span class="slider"></span></label>
                 </div>
-                
                 <hr>
                 <h3>소리 설정</h3>
                 <div class="form-row checkbox-group">
                     <label for="sound-toggle">효과음 켜기</label>
                      <label class="toggle-switch"><input type="checkbox" id="sound-toggle" onchange="toggleMute(this.checked)"><span class="slider"></span></label>
                 </div>
-
+                <hr>
+                <h3>팝업 메시지 관리</h3>
+                <div class="form-row">
+                    <button onclick="openMessageModal(); playSound('open');" style="width: 100%; background-color: var(--color-primary); color: var(--color-bg); padding: 10px 20px; border: none; border-radius: 20px; font-size: 1em; cursor: pointer; font-weight: bold;">앱 시작 메시지 설정</button>
+                </div>
                 <hr>
                 <h3>데이터 백업/복구</h3>
                 <div class="form-row" style="display:flex; gap: 10px;">
@@ -492,7 +304,6 @@
                 <input type="radio" id="type-주간" name="work-type" value="주간"><label for="type-주간">주간</label>
                 <input type="radio" id="type-야간" name="work-type" value="야간"><label for="type-야간">야간</label>
                 <input type="radio" id="type-야간퇴근(칠서)" name="work-type" value="야간퇴근(칠서)"><label for="type-야간퇴근(칠서)">야간퇴근(칠서)</label>
-                
                 <input type="radio" id="type-주특" name="work-type" value="주간특근"><label for="type-주특">주간특근</label>
                 <input type="radio" id="type-야특" name="work-type" value="야간특근"><label for="type-야특">야간특근</label>
                 <input type="radio" id="type-17시" name="work-type" value="17시퇴근"><label for="type-17시">17시 퇴근</label>
@@ -515,6 +326,7 @@
         </div>
     </div>
 </div>
+
 <div id="initial-setup-modal" class="modal"> <div class="modal-content">
         <h3>초기 설정</h3><p>사용을 위해 기본 정보를 입력해주세요.</p>
         <div class="form-row">
@@ -528,7 +340,7 @@
 <div id="confirm-modal" class="modal" style="z-index: 300;">
     <div class="modal-content">
         <h3 id="confirm-modal-title">확인</h3>
-        <p id="confirm-modal-text" style="line-height: 1.5;"></p>
+        <p id="confirm-modal-text" style="line-height: 1.5; white-space: pre-wrap;"></p>
         <div class="modal-actions">
             <button id="confirm-modal-cancel" class="secondary">취소</button>
             <button id="confirm-modal-ok" class="danger">확인</button>
@@ -536,16 +348,32 @@
     </div>
 </div>
 
-<button id="music-toggle">🎵 음악 켜기</button>
-
+<div id="message-modal" class="modal" style="z-index: 400;">
+    <div class="modal-content">
+        <h3 id="message-modal-title">앱 메시지 설정</h3>
+        <div class="form-row">
+            <label for="modal-message-content">팝업에 표시할 메시지 내용:</label>
+            <textarea id="modal-message-content" rows="6" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg); color: var(--color-text); font-size: 1em;"></textarea>
+            <small style="color: var(--color-error); display: block; margin-top: 10px;">* 메시지가 저장되면 앱 시작 시 자동으로 팝업으로 표시됩니다. (줄바꿈 가능)</small>
+        </div>
+        <div class="modal-actions">
+            <button onclick="closeModal('message-modal'); playSound('click');" class="secondary">닫기</button>
+            <button onclick="clearMessage(); playSound('delete');" class="danger">메시지 지우기</button>
+            <button onclick="saveMessage(); playSound('save');" class="primary">저장 및 닫기</button>
+        </div>
+    </div>
+</div>
 
 <script>
     /* === (시작) 메인 앱 스크립트 === */
-    const CURRENT_APP_VERSION = "2.0.5";
-    // 여기에 야간퇴근(칠서) : 2.5를 추가했습니다.
+    const CURRENT_APP_VERSION = "2.1.5"; // 버전 업데이트
     const DEFAULT_OVERTIME_MAP = { '주간': 3.0, '야간': 4.5, '야간퇴근(칠서)': 2.5, '주간특근': 0.5, '야간특근': 7.0, '17시퇴근': 0.5 };
+    const MESSAGE_STORAGE_KEY = 'smartSalaryApp_startup_message'; 
     
-const DEFAULT_HOLIDAYS_BASE = [
+    // 월별 통상임금 가산액 (상여 200만원 / 12개월)
+    const REGULAR_BONUS_MONTHLY = 2000000 / 12;
+
+    const DEFAULT_HOLIDAYS_BASE = [
         { date: '2024-01-01', name: '신정' }, { date: '2024-02-09', name: '설날' }, { date: '2024-02-10', name: '설날' }, { date: '2024-02-11', name: '설날' }, { date: '2024-02-12', name: '설날 대체공휴일' }, { date: '2024-03-01', name: '삼일절' }, 
         { date: '2024-04-10', name: '국회의원선거일' }, { date: '2024-05-05', name: '어린이날' }, { date: '2024-05-06', name: '어린이날 대체공휴일' }, { date: '2024-05-15', name: '부처님오신날' }, 
         { date: '2024-06-06', name: '현충일' }, { date: '2024-08-15', name: '광복절' }, { date: '2024-09-16', name: '추석' }, { date: '2024-09-17', name: '추석' }, { date: '2024-09-18', name: '추석' },
@@ -554,8 +382,10 @@ const DEFAULT_HOLIDAYS_BASE = [
         { date: '2025-05-05', name: '어린이날' }, { date: '2025-05-26', name: '부처님오신날' }, { date: '2025-06-06', name: '현충일' }, { date: '2025-08-15', name: '광복절' }, 
         { date: '2025-10-03', name: '개천절' }, { date: '2025-10-06', name: '추석' }, { date: '2025-10-07', name: '추석' }, { date: '2025-10-08', name: '추석' }, { date: '2025-10-09', name: '한글날' }, 
         { date: '2025-12-25', name: '성탄절' }, { date: '2026-01-01', name: '신정' }, { date: '2026-02-16', name: '설날' }, { date: '2026-02-17', name: '설날' }, { date: '2026-02-18', name: '설날' }, { date: '2026-05-05', name: '어린이날' }, { date: '2026-05-24', name: '부처님오신날' }, { date: '2026-05-25', name: '대체공휴일' }, { date: '2026-06-03', name: '전국동시지방선거' }, { date: '2026-06-06', name: '현충일' }, { date: '2026-08-15', name: '광복절' }, { date: '2026-08-17', name: '대체공휴일' }, { date: '2026-09-24', name: '추석' }, { date: '2026-09-25', name: '추석' }, { date: '2026-09-26', name: '추석' }, { date: '2026-10-03', name: '개천절' }, { date: '2026-10-05', name: '대체공휴일' }, { date: '2026-10-09', name: '한글날' }, { date: '2026-12-25', name: '성탄절' } 
-
     ];
+
+    // 현재 선택된 1월 분할 탭 ('prev', 'curr', 'total')
+    let currentJanTab = 'prev';
 
     let USER_DATA = {
         appVersion: CURRENT_APP_VERSION,
@@ -563,8 +393,10 @@ const DEFAULT_HOLIDAYS_BASE = [
         class: 'A',
         A_night_start: '2025-01-05',
         settings: { 
-            basePays: {}, 
-            regularPayChecks: {}, 
+            basePays: {}, // 1월: 신년도(19일)
+            prevYearBasePays: {}, // 1월: 전년도(12일)
+            regularPayChecks: {}, // 1월: 신년도 통상임금
+            prevYearRegularPayChecks: {}, // 1월: 전년도 통상임금 (신규 추가)
             additionalItemsByPeriod: {}, 
             customHolidays: DEFAULT_HOLIDAYS_BASE,
             isSalaryDetailsCollapsed: false, 
@@ -584,47 +416,26 @@ const DEFAULT_HOLIDAYS_BASE = [
     const getSalaryPeriodByPeriodKey = key => { if (!key) return null; const [y, m] = key.split('-').map(Number); const sd = new Date(y, m - 1, 20); const ed = new Date(y, m, 19); ed.setHours(23, 59, 59, 999); return { startDate: sd, endDate: ed }; };
     const getPreviousPeriodKey = key => { if (!key) return null; let [y, m] = key.split('-').map(Number); m--; if (m === 0) { m = 12; y--; } return `${y}-${String(m).padStart(2, '0')}`; };
     const formatDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    const getHolidayName = date => {
-        const dateStr = formatDate(date);
-        const holiday = USER_DATA.settings.customHolidays.find(h => h.date === dateStr);
-        return holiday ? holiday.name : null;
-    };
+    const getHolidayName = date => { const dateStr = formatDate(date); const holiday = USER_DATA.settings.customHolidays.find(h => h.date === dateStr); return holiday ? holiday.name : null; };
 
     // --- Data Management ---
     const saveData = () => { USER_DATA.appVersion = CURRENT_APP_VERSION; USER_DATA.settings.classChangeHistory.sort((a, b) => new Date(a.changeDate) - new Date(b.changeDate)); localStorage.setItem('smartSalaryApp_user_data', JSON.stringify(USER_DATA)); };
-    
     const loadData = () => {
         const data = localStorage.getItem('smartSalaryApp_user_data');
-        
-        if (!data) { 
-            applyTheme(false); 
-            document.getElementById('initial-setup-modal').style.display = 'flex';
-            return;
-        }
-        
+        if (!data) { applyTheme(false); document.getElementById('initial-setup-modal').style.display = 'flex'; return; }
         let loadedData;
-        try { 
-            loadedData = JSON.parse(data); 
-        } catch (e) { 
-            document.getElementById('initial-setup-modal').style.display = 'flex';
-            return; 
-        }
-
-        if (!loadedData.appVersion || loadedData.appVersion < CURRENT_APP_VERSION) {
-            // Future migration logic
-        }
+        try { loadedData = JSON.parse(data); } catch (e) { document.getElementById('initial-setup-modal').style.display = 'flex'; return; }
+        
         loadedData.A_night_start = '2025-01-05';
+        if (!loadedData.settings) loadedData.settings = {};
+        if (!loadedData.settings.prevYearBasePays) loadedData.settings.prevYearBasePays = {}; 
+        if (!loadedData.settings.prevYearRegularPayChecks) loadedData.settings.prevYearRegularPayChecks = {}; 
 
         const existingCustomHolidays = loadedData.settings?.customHolidays || [];
         const allHolidays = new Map(DEFAULT_HOLIDAYS_BASE.map(h => [h.date, h]));
         existingCustomHolidays.forEach(h => allHolidays.set(h.date, h));
-        if (!loadedData.settings) loadedData.settings = {};
         loadedData.settings.customHolidays = Array.from(allHolidays.values());
-        
-        if (loadedData.settings.isMuted === undefined) {
-            loadedData.settings.isMuted = false;
-        }
-
+        if (loadedData.settings.isMuted === undefined) loadedData.settings.isMuted = false;
         USER_DATA = { ...USER_DATA, ...loadedData };
         
         applyTheme(USER_DATA.settings.isLightMode);
@@ -633,9 +444,7 @@ const DEFAULT_HOLIDAYS_BASE = [
         document.getElementById('theme-toggle').checked = USER_DATA.settings.isLightMode;
         document.getElementById('sound-toggle').checked = !USER_DATA.settings.isMuted;
 
-        renderCustomHolidays();
-        renderOvertimeSettings();
-        renderClassChangeHistory();
+        renderCustomHolidays(); renderOvertimeSettings(); renderClassChangeHistory();
         if (USER_DATA.settings.isSalaryDetailsCollapsed) {
             document.getElementById('salary-input-section').classList.add('collapsed');
             document.getElementById('salary-details-container').classList.add('collapsed');
@@ -643,104 +452,210 @@ const DEFAULT_HOLIDAYS_BASE = [
         }
         generateCalendar(true);
     };
-    const completeInitialSetup = () => {
-        const initClass = document.getElementById('init-class').value;
-        USER_DATA.class = initClass;
-        saveData();
-        document.getElementById('setting-class').value = initClass; 
-        document.getElementById('initial-setup-modal').style.display = 'none';
-        generateCalendar(true);
-    };
+    const completeInitialSetup = () => { const initClass = document.getElementById('init-class').value; USER_DATA.class = initClass; saveData(); document.getElementById('setting-class').value = initClass; document.getElementById('initial-setup-modal').style.display = 'none'; generateCalendar(true); };
 
     // --- Work Type Calculation ---
     const getClassForDate = date => { const dateStr = formatDate(date); let cls = USER_DATA.class; for (let i = USER_DATA.settings.classChangeHistory.length - 1; i >= 0; i--) { const r = USER_DATA.settings.classChangeHistory[i]; if (dateStr >= r.changeDate) { cls = r.newClass; break; } } return cls; };
-    const getCalculatedWorkType = (date, cls, start) => { 
-        const s = new Date(start); 
-        if (isNaN(s)) return { type: '미선택' }; 
-        const diff = Math.floor((new Date(date.getFullYear(), date.getMonth(), date.getDate()) - s) / 864e5);
-        const w = (Math.floor((diff + 1) / 7) % 3 + 3) % 3; 
-        let type = '주간'; 
-        if ((cls === 'A' && w === 0) || (cls === 'B' && w === 1) || (cls === 'C' && w === 2)) type = '야간'; 
-        return { type }; 
-    };
+    const getCalculatedWorkType = (date, cls, start) => { const s = new Date(start); if (isNaN(s)) return { type: '미선택' }; const diff = Math.floor((new Date(date.getFullYear(), date.getMonth(), date.getDate()) - s) / 864e5); const w = (Math.floor((diff + 1) / 7) % 3 + 3) % 3; let type = '주간'; if ((cls === 'A' && w === 0) || (cls === 'B' && w === 1) || (cls === 'C' && w === 2)) type = '야간'; return { type }; };
     const isHoliday = date => USER_DATA.settings.customHolidays.some(h => h.date === formatDate(date));
 
-    // --- Salary Calculation ---
+    // --- Salary Calculation Logic (분할 통계 + 역산 + 반별 시수 적용) ---
     const calculatePeriodStats = (periodKey) => {
-        const stats = { totalSalary: 0, nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, basePay: 0, finalHourlyWage: 0 };
+        const stats = { 
+            totalSalary: 0, 
+            basePay: 0, 
+            finalHourlyWage: 0,
+            nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0,
+            
+            // 내부 계산용: 분리된 통계
+            prevPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0 },
+            currPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0 }
+        };
+
         const period = getSalaryPeriodByPeriodKey(periodKey);
         if (!period) return stats;
 
+        const isJanuary = periodKey.endsWith('-12'); // 1월 급여 기간 (12.20~01.19)
+        
+        // --- 1. 기본급 및 시급 계산 (핵심 수정) ---
+        let basePayCurr = USER_DATA.settings.basePays[periodKey] || 0; 
+        let basePayPrev = isJanuary ? (USER_DATA.settings.prevYearBasePays[periodKey] || 0) : basePayCurr;
+
+        const isRegularPayCheckedCurr = USER_DATA.settings.regularPayChecks[periodKey] || false;
+        const isRegularPayCheckedPrev = isJanuary ? (USER_DATA.settings.prevYearRegularPayChecks[periodKey] || false) : isRegularPayCheckedCurr;
+        
+        // 반 정보 및 기준 시수 (D반은 209, 그 외 226)
         const currentClass = getClassForDate(period.startDate);
         const standardMonthlyHours = (currentClass === 'D') ? 209 : 226; 
 
-        stats.basePay = USER_DATA.settings.basePays[periodKey] || 0;
-        const isRegularPayChecked = USER_DATA.settings.regularPayChecks[periodKey] || false;
-        
-        let effectiveBasePay = stats.basePay;
-        if (isRegularPayChecked) {
-            const regularPayAnnualBonus = 2000000;
-            effectiveBasePay += (regularPayAnnualBonus / 12);
-        }
-        const hourlyWage = stats.basePay > 0 ? effectiveBasePay / standardMonthlyHours : 0;
-        stats.finalHourlyWage = hourlyWage;
+        if (isJanuary) {
+            // [전년도 12일분]
+            // 입력값은 12일치이므로 31/12를 곱해 월 기본급을 복원
+            let fullMonthBasePrev = basePayPrev * (31 / 12);
+            if (isRegularPayCheckedPrev) fullMonthBasePrev += REGULAR_BONUS_MONTHLY;
+            stats.prevPart.hourlyWage = fullMonthBasePrev > 0 ? fullMonthBasePrev / standardMonthlyHours : 0;
 
+            // [신년도 19일분]
+            // 입력값은 19일치이므로 31/19를 곱해 월 기본급을 복원
+            let fullMonthBaseCurr = basePayCurr * (31 / 19);
+            if (isRegularPayCheckedCurr) fullMonthBaseCurr += REGULAR_BONUS_MONTHLY;
+            stats.currPart.hourlyWage = fullMonthBaseCurr > 0 ? fullMonthBaseCurr / standardMonthlyHours : 0;
+
+            // 총 기본급은 입력값의 합 (일할 계산된 값을 입력했으므로 그대로 합산)
+            stats.basePay = basePayPrev + basePayCurr;
+        } else {
+            // [평달]
+            let fullMonthBase = basePayCurr;
+            if (isRegularPayCheckedCurr) fullMonthBase += REGULAR_BONUS_MONTHLY;
+            stats.currPart.hourlyWage = fullMonthBase > 0 ? fullMonthBase / standardMonthlyHours : 0;
+            stats.basePay = basePayCurr;
+        }
+
+        // --- 2. 날짜별 루프 및 통계 누적 ---
         let tempDate = new Date(period.startDate);
         while (tempDate <= period.endDate) {
             const dateStr = formatDate(tempDate);
             const workRecord = USER_DATA.workRecords[dateStr];
+            
+            // 전년도(12월 20일 ~ 12월 31일)인지 판별
+            const isPrevYearDate = isJanuary && (tempDate.getMonth() === 11);
+            const targetPart = isPrevYearDate ? stats.prevPart : stats.currPart;
+            const appliedHourlyWage = targetPart.hourlyWage;
+
             if (workRecord && workRecord.type !== '미선택') {
-                if (workRecord.type.includes('야간')) stats.nightDays++;
-                if (workRecord.type.includes('특근')) stats.specialDays++;
-                if (workRecord.type === '휴가') stats.vacationDays++;
-                else if (workRecord.type === '반차') stats.vacationDays += 0.5;
+                if (workRecord.type.includes('야간')) targetPart.nightDays++;
+                if (workRecord.type.includes('특근')) targetPart.specialDays++;
+                if (workRecord.type === '휴가') targetPart.vacationDays++;
+                else if (workRecord.type === '반차') targetPart.vacationDays += 0.5;
 
                 let totalOvertime = 0;
                 totalOvertime += DEFAULT_OVERTIME_MAP[workRecord.type] || 0; 
                 if (workRecord.overtimes) totalOvertime += workRecord.overtimes.reduce((sum, item) => sum + (Number(item.time) || 0), 0);
 
-                if (totalOvertime > 0) {
-                    const isHolidayDay = isHoliday(tempDate) || tempDate.getDay() === 0;
-                    if (workRecord.type.includes('특근') || isHolidayDay) stats.specialOT += totalOvertime;
-                    else stats.weekdayOT += totalOvertime;
+                if (appliedHourlyWage > 0) {
+                    // 특근 잔업 (특근일 근무 또는 휴일 근무)
+                    const isSpecialDay = workRecord.type.includes('특근') || tempDate.getDay() === 0;
+                    
+                    if (totalOvertime > 0) {
+                        if (isSpecialDay) {
+                            targetPart.specialOT += totalOvertime;
+                            targetPart.specialOTAmount += (totalOvertime * appliedHourlyWage * 2.0); // 특근 잔업 200%
+                        } else {
+                            targetPart.weekdayOT += totalOvertime;
+                            targetPart.weekdayOTAmount += (totalOvertime * appliedHourlyWage * 1.5); // 평일 잔업 150%
+                        }
+                    }
+                    
+                    // 특근 수당 (8시간 기준)
+                    if (workRecord.type.includes('특근')) {
+                        targetPart.specialAmount += (1 * appliedHourlyWage * 1.5 * 8); 
+                    }
+                    
+                    // 야간 수당 (8시간 기준)
+                    if (workRecord.type.includes('야간')) {
+                        targetPart.nightAmount += (1 * appliedHourlyWage * 0.5 * 8); 
+                    }
                 }
             }
             tempDate.setDate(tempDate.getDate() + 1);
         }
-        
-        stats.weekdayOTAmount = stats.weekdayOT * hourlyWage * 1.5;
-        stats.specialOTAmount = stats.specialOT * hourlyWage * 2.0;
-        stats.specialAmount = stats.specialDays * hourlyWage * 1.5 * 8; 
-        stats.nightAmount = stats.nightDays * hourlyWage * 0.5 * 8; 
-        
+
+        // --- 3. UI 표시용 통계 합산 (전체 합계용) ---
         const additionalItems = USER_DATA.settings.additionalItemsByPeriod[periodKey] || [];
         const totalAdditionalAmount = additionalItems.reduce((sum, item) => sum + item.amount, 0);
-        stats.totalSalary = stats.basePay + stats.weekdayOTAmount + stats.specialOTAmount + stats.specialAmount + stats.nightAmount + totalAdditionalAmount;
+
+        // 전체 급여 합계
+        stats.totalSalary = stats.basePay 
+                            + stats.prevPart.weekdayOTAmount + stats.currPart.weekdayOTAmount
+                            + stats.prevPart.specialOTAmount + stats.currPart.specialOTAmount
+                            + stats.prevPart.specialAmount + stats.currPart.specialAmount
+                            + stats.prevPart.nightAmount + stats.currPart.nightAmount
+                            + totalAdditionalAmount;
+                            
+        // [FIXED] 1월(분할 계산)인 경우에도 통계 표시에 사용할 일수 합산 로직 추가
+        if (isJanuary) {
+            stats.nightDays = stats.prevPart.nightDays + stats.currPart.nightDays;
+            stats.specialDays = stats.prevPart.specialDays + stats.currPart.specialDays;
+            stats.vacationDays = stats.prevPart.vacationDays + stats.currPart.vacationDays;
+        } else {
+            Object.assign(stats, stats.currPart);
+            stats.finalHourlyWage = stats.currPart.hourlyWage;
+        }
+
         return stats;
     };
+
     const updateSalary = () => {
         const currentKey = getCurrentActivePeriodKey();
         if (!currentKey) return;
         const stats = calculatePeriodStats(currentKey);
+        
+        // 전체 총 급여 (상단 큰 글씨)
         document.getElementById('total-expected-salary').textContent = Math.round(stats.totalSalary).toLocaleString() + ' 원';
-        document.getElementById('current-salary-options').textContent = `적용시급: ${stats.finalHourlyWage.toLocaleString(undefined, { maximumFractionDigits: 0 })}원`;
+        
+        // 1월인 경우 탭 상태에 따라 표시할 통계 및 시급 결정
+        const isJanuary = currentKey.endsWith('-12');
+        let displayStats = stats;
+        let displayHourlyWageText = Math.round(stats.finalHourlyWage).toLocaleString() + '원';
+        
+        if (isJanuary) {
+            const wagePrev = Math.round(stats.prevPart.hourlyWage);
+            const wageCurr = Math.round(stats.currPart.hourlyWage);
+
+            if (currentJanTab === 'prev') {
+                displayStats = stats.prevPart;
+                displayHourlyWageText = wagePrev.toLocaleString() + '원';
+                document.getElementById('stats-period-indicator').textContent = '12.20 ~ 12.31 통계';
+            } else if (currentJanTab === 'curr') {
+                displayStats = stats.currPart;
+                displayHourlyWageText = wageCurr.toLocaleString() + '원';
+                document.getElementById('stats-period-indicator').textContent = '01.01 ~ 01.19 통계';
+            } else if (currentJanTab === 'total') {
+                // 통합 탭 로직 추가: 두 부분의 통계를 합산
+                displayStats = {
+                    weekdayOT: stats.prevPart.weekdayOT + stats.currPart.weekdayOT,
+                    weekdayOTAmount: stats.prevPart.weekdayOTAmount + stats.currPart.weekdayOTAmount,
+                    specialOT: stats.prevPart.specialOT + stats.currPart.specialOT,
+                    specialOTAmount: stats.prevPart.specialOTAmount + stats.currPart.specialOTAmount,
+                    specialDays: stats.prevPart.specialDays + stats.currPart.specialDays,
+                    specialAmount: stats.prevPart.specialAmount + stats.currPart.specialAmount,
+                    nightDays: stats.prevPart.nightDays + stats.currPart.nightDays,
+                    nightAmount: stats.prevPart.nightAmount + stats.currPart.nightAmount
+                };
+                displayHourlyWageText = '구간별 상이 (통합보기)';
+                document.getElementById('stats-period-indicator').textContent = '12.20 ~ 01.19 전체 통계';
+            }
+            document.getElementById('stats-period-indicator').style.display = 'block';
+        } else {
+            document.getElementById('stats-period-indicator').style.display = 'none';
+        }
+        
+        document.getElementById('current-salary-options').textContent = `적용시급: ${displayHourlyWageText}`;
+
+        // 통계 박스 업데이트
         ['weekday-ot-time', 'special-ot-time', 'special-day-count', 'night-day-count'].forEach(key => {
             let count = 0, amount = 0;
-            
             if(key.includes('-ot-time')) { 
                 const type = key.split('-')[0];
-                count = stats[type + 'OT'].toFixed(1) + 'h';
-                amount = stats[type + 'OTAmount'];
+                count = (displayStats[type + 'OT'] || 0).toFixed(1) + 'h';
+                amount = displayStats[type + 'OTAmount'] || 0;
             } else {
                 const type = key.split('-')[0];
                 const statsKey = type === 'special' ? 'specialDays' : 'nightDays';
                 const amountKey = type === 'special' ? 'specialAmount' : 'nightAmount';
-                count = stats[statsKey] + '일';
-                amount = stats[amountKey];
+                count = (displayStats[statsKey] || 0) + '일';
+                amount = displayStats[amountKey] || 0;
             }
             document.getElementById(`stat-${key}-count`).textContent = count;
             document.getElementById(`stat-${key}-amount`).textContent = Math.round(amount).toLocaleString() + ' 원';
         });
+    };
+
+    // --- 1월 탭 전환 로직 ---
+    const switchJanTab = (tab) => {
+        currentJanTab = tab;
+        loadPeriodSettingsToUI(); // UI 다시 그리기
+        playSound('click');
     };
 
     // --- UI Rendering ---
@@ -779,11 +694,7 @@ const DEFAULT_HOLIDAYS_BASE = [
         calendarView.removeEventListener('scroll', updateActiveMonth);
         calendarView.addEventListener('scroll', updateActiveMonth);
 
-        if (scrollToToday && lastScrollMonthId) {
-            scrollToTodayMonth(lastScrollMonthId, true);
-        } else {
-            updateActiveMonth();
-        }
+        if (scrollToToday && lastScrollMonthId) { scrollToTodayMonth(lastScrollMonthId, true); } else { updateActiveMonth(); }
     };
     const updateDayCell = (dateStr, cell) => {
         const dayCell = cell || document.querySelector(`.day-cell[data-date="${dateStr}"]`);
@@ -796,27 +707,13 @@ const DEFAULT_HOLIDAYS_BASE = [
         
         const workType = workRecord ? workRecord.type : '';
         let dayStatusText = workType === '미선택' ? '' : workType;
-        
         dayCell.classList.toggle('night-shift-background', calculated.type.includes('야간'));
-        
         const isHoli = isHoliday(date) || date.getDay() === 0;
         dayCell.classList.toggle('holiday', isHoli);
-        
-        if (isHoli && dayStatusText === '') { 
-            const holidayName = getHolidayName(date);
-            if (holidayName) {
-                dayStatusText = holidayName;
-            }
-        }
-        
+        if (isHoli && dayStatusText === '') { const holidayName = getHolidayName(date); if (holidayName) { dayStatusText = holidayName; } }
         let totalOvertime = 0;
-        if (workType !== '미선택' && workType !== '휴무' && workType !== '휴가' && workType !== '반차') {
-            totalOvertime += DEFAULT_OVERTIME_MAP[workType] || 0;
-        }
-        if (workRecord?.overtimes) {
-            totalOvertime += workRecord.overtimes.reduce((sum, item) => sum + (Number(item.time) || 0), 0);
-        }
-
+        if (workType !== '미선택' && workType !== '휴무' && workType !== '휴가' && workType !== '반차') { totalOvertime += DEFAULT_OVERTIME_MAP[workType] || 0; }
+        if (workRecord?.overtimes) { totalOvertime += workRecord.overtimes.reduce((sum, item) => sum + (Number(item.time) || 0), 0); }
         dayCell.innerHTML = `<div class="day-number">${day}</div><div class="day-status" style="color:${calculated.type.includes('야간') ? 'var(--color-secondary)' : 'var(--color-primary)'};">${dayStatusText}</div><div class="day-overtime">${totalOvertime > 0 ? totalOvertime.toFixed(1) + 'h' : ''}</div>`;
     };
     let scrollTimeout;
@@ -826,33 +723,285 @@ const DEFAULT_HOLIDAYS_BASE = [
             const calendarViewRect = document.getElementById('calendar-view').getBoundingClientRect();
             const viewportCenter = calendarViewRect.top + calendarViewRect.height / 2;
             const months = document.querySelectorAll('.calendar-month');
-            let closestMonth = null;
-            let minDistance = Infinity;
-            months.forEach(month => { 
-                const monthRect = month.getBoundingClientRect();
-                const monthCenter = monthRect.top + monthRect.height / 2;
-                const distance = Math.abs(viewportCenter - monthCenter);
-                if (distance < minDistance) { minDistance = distance; closestMonth = month; }
-            });
-            if (closestMonth && !closestMonth.classList.contains('active')) {
-                months.forEach(m => m.classList.remove('active'));
-                closestMonth.classList.add('active');
-                loadPeriodSettingsToUI(); 
-            }
+            let closestMonth = null; let minDistance = Infinity;
+            months.forEach(month => { const monthRect = month.getBoundingClientRect(); const monthCenter = monthRect.top + monthRect.height / 2; const distance = Math.abs(viewportCenter - monthCenter); if (distance < minDistance) { minDistance = distance; closestMonth = month; } });
+            if (closestMonth && !closestMonth.classList.contains('active')) { months.forEach(m => m.classList.remove('active')); closestMonth.classList.add('active'); loadPeriodSettingsToUI(); }
         }, 100);
     };
+
+    // --- Dynamic UI Input Loading (1월 분할 탭 적용) ---
     const loadPeriodSettingsToUI = () => {
         const currentKey = getCurrentActivePeriodKey();
         if (!currentKey) return;
         const period = getSalaryPeriodByPeriodKey(currentKey);
         if(period) document.getElementById('salary-period-info').textContent = `총 예상 월급 (${formatDate(period.startDate)} ~ ${formatDate(period.endDate)})`;
-        document.getElementById('base-pay').value = USER_DATA.settings.basePays[currentKey] || '';
-        document.getElementById('regular-pay-check').checked = USER_DATA.settings.regularPayChecks[currentKey] || false;
+        
+        const container = document.getElementById('base-pay-container');
+        const tabsContainer = document.getElementById('january-split-tabs');
+        
+        const isJanuary = currentKey.endsWith('-12');
+        
+        // 1월인 경우 탭 UI 활성화 (3번째 탭 '통합(전체)' 추가)
+        if (isJanuary) {
+            tabsContainer.style.display = 'flex';
+            tabsContainer.className = 'sub-tab-container';
+            tabsContainer.innerHTML = `
+                <button class="sub-tab-button ${currentJanTab === 'prev' ? 'active' : ''}" onclick="switchJanTab('prev')">전년도 (12일)</button>
+                <button class="sub-tab-button ${currentJanTab === 'curr' ? 'active' : ''}" onclick="switchJanTab('curr')">신년도 (19일)</button>
+                <button class="sub-tab-button ${currentJanTab === 'total' ? 'active' : ''}" onclick="switchJanTab('total')">전체 (통합)</button>
+            `;
+            
+            // 현재 탭에 따른 입력값 로드
+            if (currentJanTab === 'total') {
+                // 통합 탭: 읽기 전용 요약 뷰
+                const prevVal = USER_DATA.settings.prevYearBasePays[currentKey] || 0;
+                const currVal = USER_DATA.settings.basePays[currentKey] || 0;
+                const totalVal = prevVal + currVal;
+                
+                document.getElementById('base-pay-label').textContent = '기본급 합계 (전년+신년)';
+                container.innerHTML = `
+                    <div style="font-size: 0.95em; color: var(--color-text);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span style="color:var(--color-text-secondary);">전년도(12일):</span> <span>${prevVal.toLocaleString()}원</span></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; padding-bottom:5px; border-bottom:1px solid var(--color-border);"><span style="color:var(--color-text-secondary);">신년도(19일):</span> <span>${currVal.toLocaleString()}원</span></div>
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--color-primary);"><span>합계:</span> <span>${totalVal.toLocaleString()}원</span></div>
+                    </div>
+                `;
+                // 통상임금 체크박스 숨기거나 비활성화 (개별 설정이므로 통합 탭에선 설정 불가)
+                document.getElementById('regular-pay-group').style.display = 'none';
+
+            } else if (currentJanTab === 'prev') {
+                document.getElementById('regular-pay-group').style.display = 'flex';
+                const prevVal = USER_DATA.settings.prevYearBasePays[currentKey] || '';
+                const isRegPrev = USER_DATA.settings.prevYearRegularPayChecks[currentKey] || false;
+                
+                document.getElementById('base-pay-label').textContent = '전년도 기본급 입력';
+                container.innerHTML = `
+                    <div style="display:flex; gap: 5px;">
+                        <input type="number" inputmode="decimal" id="base-pay-prev" placeholder="전년도 기본급" value="${prevVal}" oninput="saveSplitBasePaySetting()" style="flex: 1;">
+                        <button onclick="copyPreviousMonthBasePay(); playSound('click');" style="background-color: var(--color-secondary); color: var(--color-bg); padding: 5px; border: none; border-radius: 4px; font-size: 0.8em; width: 50px; cursor:pointer; line-height:1.2;">지난달<br>복사</button>
+                    </div>
+                `;
+                document.getElementById('regular-pay-check').checked = isRegPrev;
+                document.getElementById('regular-pay-check').onclick = () => { saveSplitRegularPayCheckSetting(); playSound('toggle'); };
+            } else { // curr
+                document.getElementById('regular-pay-group').style.display = 'flex';
+                const currVal = USER_DATA.settings.basePays[currentKey] || '';
+                const isRegCurr = USER_DATA.settings.regularPayChecks[currentKey] || false;
+                
+                document.getElementById('base-pay-label').textContent = '신년도 기본급 입력';
+                container.innerHTML = `
+                    <div style="display:flex; gap: 5px;">
+                        <input type="number" inputmode="decimal" id="base-pay-curr" placeholder="올해 기본급" value="${currVal}" oninput="saveSplitBasePaySetting()" style="flex: 1;">
+                        <button onclick="copyPreviousMonthBasePay(); playSound('click');" style="background-color: var(--color-secondary); color: var(--color-bg); padding: 5px; border: none; border-radius: 4px; font-size: 0.8em; width: 50px; cursor:pointer; line-height:1.2;">전년도<br>복사</button>
+                    </div>
+                `;
+                document.getElementById('regular-pay-check').checked = isRegCurr;
+                document.getElementById('regular-pay-check').onclick = () => { saveSplitRegularPayCheckSetting(); playSound('toggle'); };
+            }
+
+        } else {
+            // 평달: 탭 숨김 및 기본 UI
+            tabsContainer.style.display = 'none';
+            document.getElementById('regular-pay-group').style.display = 'flex';
+            const val = USER_DATA.settings.basePays[currentKey] || '';
+            const isReg = USER_DATA.settings.regularPayChecks[currentKey] || false;
+            
+            document.getElementById('base-pay-label').textContent = '기본급 입력';
+            container.innerHTML = `
+                <div style="display:flex; gap: 5px;">
+                    <input type="number" inputmode="decimal" id="base-pay" placeholder="기본급" value="${val}" oninput="saveBasePaySetting()" style="flex: 1;">
+                    <button onclick="copyPreviousMonthBasePay(); playSound('click');" style="background-color: var(--color-secondary); color: var(--color-bg); padding: 5px 10px; border: none; border-radius: 4px; font-size: 0.8em; line-height: 1.2; text-align: center; width: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer;">이전달<br>기본급</button>
+                </div>
+            `;
+            document.getElementById('regular-pay-check').checked = isReg;
+            document.getElementById('regular-pay-check').onclick = () => { saveRegularPayCheckSetting(); playSound('toggle'); };
+        }
+
         renderAdditionalItems(currentKey);
         updateSalary();
     };
 
-    // --- Work Record Modal ---
+    // 평달 저장
+    const saveBasePaySetting = () => { const key = getCurrentActivePeriodKey(); if (key) { USER_DATA.settings.basePays[key] = Number(document.getElementById('base-pay').value) || 0; saveData(); updateSalary(); } };
+    const saveRegularPayCheckSetting = () => { const key = getCurrentActivePeriodKey(); if (key) { USER_DATA.settings.regularPayChecks[key] = document.getElementById('regular-pay-check').checked; saveData(); updateSalary(); } };
+
+    // 1월 분할 저장
+    const saveSplitBasePaySetting = () => {
+        const key = getCurrentActivePeriodKey();
+        if (key) {
+            if (currentJanTab === 'prev') {
+                const val = Number(document.getElementById('base-pay-prev').value) || 0;
+                USER_DATA.settings.prevYearBasePays[key] = val;
+            } else if (currentJanTab === 'curr') {
+                const val = Number(document.getElementById('base-pay-curr').value) || 0;
+                USER_DATA.settings.basePays[key] = val;
+            }
+            saveData();
+            updateSalary();
+        }
+    };
+    
+    const saveSplitRegularPayCheckSetting = () => {
+        const key = getCurrentActivePeriodKey();
+        if (key) {
+            const isChecked = document.getElementById('regular-pay-check').checked;
+            if (currentJanTab === 'prev') {
+                USER_DATA.settings.prevYearRegularPayChecks[key] = isChecked;
+            } else if (currentJanTab === 'curr') {
+                USER_DATA.settings.regularPayChecks[key] = isChecked;
+            }
+            saveData();
+            updateSalary();
+        }
+    };
+
+    const saveSettings = () => { USER_DATA.class = document.getElementById('setting-class').value; saveData(); generateCalendar(); };
+    const addOvertimeSettingItem = (name = '', time = 0.5) => { const container = document.getElementById('overtime-list-container'); const div = document.createElement('div'); let timeOptions = ''; for (let i = 0; i <= 10; i += 0.5) timeOptions += `<option value="${i}" ${i === time ? 'selected' : ''}>${i.toFixed(1)}h</option>`; div.innerHTML = `<input type="text" placeholder="잔업 이름" value="${name}" oninput="saveOvertimeSettings()"><select onchange="saveOvertimeSettings()">${timeOptions}</select><button onclick="this.parentNode.remove(); saveOvertimeSettings(); playSound('delete');" style="background: none; border: none; color: var(--color-error); padding: 5px; font-size: 1.2em;">&times;</button>`; container.appendChild(div); };
+    const saveOvertimeSettings = () => { const list = []; document.querySelectorAll('#overtime-list-container > div').forEach(div => { const name = div.querySelector('input[type="text"]').value; const time = Number(div.querySelector('select').value); if (name) list.push({ name, time }); }); USER_DATA.settings.overtimeList = list; saveData(); };
+
+    // --- Work Record Modal & Others ---
+    const switchTab = (tabName) => { document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active')); document.getElementById(`tab-content-${tabName}`).style.display = 'block'; document.getElementById(`tab-${tabName}`).classList.add('active'); if (tabName === 'statistics') { populateStatsFilter(); renderStatistics(); } else if (tabName === 'calendar') { loadPeriodSettingsToUI(); } };
+    const closeModal = (modalId) => document.getElementById(modalId).style.display = 'none';
+    
+    // showConfirm 함수 수정: onlyOk 매개변수 추가 및 기능 개선
+    const showConfirm = (title, text, onOk, onlyOk = false) => {
+        const modal = document.getElementById('confirm-modal');
+        document.getElementById('confirm-modal-title').textContent = title;
+        // 팝업 메시지는 줄바꿈을 허용 (white-space: pre-wrap; 스타일로 처리)
+        document.getElementById('confirm-modal-text').textContent = text; 
+
+        const okBtn = document.getElementById('confirm-modal-ok');
+        const cancelBtn = document.getElementById('confirm-modal-cancel');
+        
+        cancelBtn.style.display = onlyOk ? 'none' : 'inline-block';
+        okBtn.textContent = onlyOk ? '확인' : '확인'; // 텍스트를 '확인'으로 통일
+
+        const close = () => {
+            modal.style.display = 'none';
+            // 이벤트 리스너가 중복해서 쌓이는 것을 방지하기 위해 이전에 할당된 리스너를 제거 (클린업)
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+        };
+        const okWithSoundListener = () => { onOk(); close(); playSound('save'); };
+        const cancelWithSoundListener = () => { close(); playSound('click'); };
+
+        // 새로운 이벤트 리스너 할당 (클린하게 처리)
+        okBtn.onclick = okWithSoundListener;
+        if (!onlyOk) {
+            cancelBtn.onclick = cancelWithSoundListener;
+        } else {
+            // onlyOk 모드일 때 취소 버튼 역할은 닫기
+            cancelBtn.onclick = cancelWithSoundListener;
+        }
+        
+        modal.style.display = 'flex';
+    };
+    
+    // 앱 시작 메시지 관련 함수
+    const openMessageModal = () => {
+        const message = localStorage.getItem(MESSAGE_STORAGE_KEY) || '';
+        document.getElementById('modal-message-content').value = message;
+        document.getElementById('message-modal').style.display = 'flex';
+    };
+
+    const saveMessage = () => {
+        const message = document.getElementById('modal-message-content').value.trim();
+        if (message) {
+            localStorage.setItem(MESSAGE_STORAGE_KEY, message);
+            alert('메시지가 성공적으로 저장되었습니다. 앱 재시작 시 팝업으로 표시됩니다.');
+        } else {
+            localStorage.removeItem(MESSAGE_STORAGE_KEY);
+            alert('메시지 내용이 비어있어 팝업 기능이 비활성화되었습니다.');
+        }
+        closeModal('message-modal');
+    };
+
+    const clearMessage = () => {
+        localStorage.removeItem(MESSAGE_STORAGE_KEY);
+        document.getElementById('modal-message-content').value = '';
+        alert('팝업 메시지가 삭제되었습니다.');
+        closeModal('message-modal');
+    };
+    
+    const checkStartupMessage = () => {
+        const message = localStorage.getItem(MESSAGE_STORAGE_KEY);
+        if (message) {
+            // onlyOk = true로 설정하여 '확인' 버튼만 표시
+            showConfirm('앱 시작 알림', message, () => {}, true);
+        }
+    };
+    // ------------------------------------
+
+    const resetAllData = () => showConfirm('데이터 초기화', '경고: 모든 저장된 데이터를 영구적으로 삭제하고 초기화하시겠습니까?', () => { localStorage.removeItem('smartSalaryApp_user_data'); window.location.reload(); }); 
+    const backupData = () => { const dataStr = JSON.stringify(USER_DATA); const blob = new Blob([dataStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `smartSalaryApp_backup_${formatDate(new Date())}.json`; a.click(); URL.revokeObjectURL(a.href); };
+    const restoreData = (event) => { const file = event.target.files[0]; if (!file) return; showConfirm('데이터 복구', '현재 데이터를 덮어쓰고 복구하시겠습니까?', () => { const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (!data.account) throw new Error("Invalid data"); localStorage.setItem('smartSalaryApp_user_data', JSON.stringify(data)); window.location.reload(); } catch (err) { alert('복구 실패: 잘못된 파일입니다.'); } }; reader.readAsText(file); }); event.target.value = ''; };
+
+    const toggleSalaryDetails = () => { const collapsed = document.getElementById('salary-input-section').classList.toggle('collapsed'); document.getElementById('salary-details-container').classList.toggle('collapsed'); document.getElementById('toggle-salary-details').textContent = collapsed ? '▲' : '▼'; USER_DATA.settings.isSalaryDetailsCollapsed = collapsed; saveData(); };
+    const copyPreviousMonthBasePay = () => { const prevKey = getPreviousPeriodKey(getCurrentActivePeriodKey()); const prevPay = USER_DATA.settings.basePays[prevKey] || 0; 
+        // 1월일 경우 복사 로직
+        const currentKey = getCurrentActivePeriodKey();
+        if (currentKey.endsWith('-12')) {
+            if (currentJanTab === 'prev') {
+                if (prevPay > 0) { document.getElementById('base-pay-prev').value = prevPay; saveSplitBasePaySetting(); }
+            } else {
+                 const prevJanPart = USER_DATA.settings.prevYearBasePays[currentKey] || 0;
+                 if (prevJanPart > 0) { document.getElementById('base-pay-curr').value = prevJanPart; saveSplitBasePaySetting(); }
+            }
+        } else {
+            if (prevPay > 0) { document.getElementById('base-pay').value = prevPay; saveBasePaySetting(); } 
+        }
+    };
+    
+    const copyPreviousMonthAdditionalItems = () => { const currentKey = getCurrentActivePeriodKey(); if (!currentKey) return; const prevKey = getPreviousPeriodKey(currentKey); if (!prevKey) return; const previousItems = USER_DATA.settings.additionalItemsByPeriod[prevKey]; if (previousItems && previousItems.length > 0) { USER_DATA.settings.additionalItemsByPeriod[currentKey] = JSON.parse(JSON.stringify(previousItems)); saveData(); renderAdditionalItems(currentKey); updateSalary(); } else { alert('지난 달에 저장된 추가 수당 목록이 없습니다.'); } };
+    const addAdditionalItem = (n = '', a = '') => { const c = document.getElementById('additional-items-list'); const d = document.createElement('div'); d.innerHTML = `<input type="text" placeholder="수당 이름" value="${n}" oninput="saveAdditionalItems()"><input type="number" inputmode="decimal" placeholder="금액" value="${a}" oninput="saveAdditionalItems()" style="flex: 1;"><button onclick="toggleSign(this.previousElementSibling); playSound('click');" style="background-color: var(--color-disabled); color: var(--color-bg); border: 1px solid var(--color-border); border-radius: 4px; font-weight: bold; width: 40px; height: 34px; margin-left: 5px; cursor: pointer; flex: 0 0 40px; padding: 0;">+/-</button><button onclick="this.parentNode.remove(); saveAdditionalItems(); playSound('delete');" style="background: none; border: none; color: var(--color-error); padding: 5px; font-size: 1.2em; flex: 0 0 30px;">&times;</button>`; c.appendChild(d); };
+    const renderAdditionalItems = key => { const c = document.getElementById('additional-items-list'); c.innerHTML = ''; if (key) (USER_DATA.settings.additionalItemsByPeriod[key] || []).forEach(i => addAdditionalItem(i.name, i.amount)); };
+    const saveAdditionalItems = () => { const key = getCurrentActivePeriodKey(); if (!key) return; const items = []; document.querySelectorAll('#additional-items-list > div').forEach(d => { const inputs = d.querySelectorAll('input'); const n = inputs[0].value; const a = Number(inputs[1].value); if (n) items.push({ name: n, amount: a }); }); USER_DATA.settings.additionalItemsByPeriod[key] = items; saveData(); updateSalary(); };
+    const toggleSign = (inputElement) => { if (!inputElement || inputElement.value === '') return; inputElement.value = Number(inputElement.value) * -1; inputElement.dispatchEvent(new Event('input', { bubbles: true })); };
+
+    const populateStatsFilter = () => { const yf = document.getElementById('stats-year-filter'); const years = new Set(); Object.keys(USER_DATA.settings.basePays).forEach(k => years.add(k.substring(0, 4))); Object.keys(USER_DATA.workRecords).forEach(d => years.add(d.substring(0, 4))); years.add(new Date().getFullYear().toString()); const sorted = Array.from(years).sort((a, b) => b - a); yf.innerHTML = '<option value="all">전체 년도</option>'; sorted.forEach(y => yf.innerHTML += `<option value="${y}">${y}년</option>`); yf.value = new Date().getFullYear(); };
+    
+    // [FIXED] 통계 렌더링 함수 수정: 월 밀림 현상 해결 (1월 급여 = 작년 12월 구간 데이터 매칭)
+    const renderStatistics = () => { 
+        const yVal = document.getElementById('stats-year-filter').value;
+        const mVal = Number(document.getElementById('stats-month-filter').value);
+        const tb = document.getElementById('stats-table-body'); 
+        tb.innerHTML = ''; 
+        let years = yVal === 'all' ? Array.from(document.getElementById('stats-year-filter').options).map(o => o.value).filter(v => v !== 'all') : [yVal]; 
+        let total = 0; 
+        
+        years.forEach(y => { 
+            // 1월부터 12월까지 순회
+            for (let displayMonth = (mVal || 1); displayMonth <= (mVal || 12); displayMonth++) { 
+                let targetYear = Number(y);
+                let targetKeyMonth = displayMonth - 1; // 1월이면 0(이전년도 12월)이 되어야 함
+                
+                if (targetKeyMonth === 0) {
+                    targetKeyMonth = 12;
+                    targetYear = targetYear - 1;
+                }
+                
+                const key = `${targetYear}-${String(targetKeyMonth).padStart(2, '0')}`;
+                const s = calculatePeriodStats(key); 
+
+                if (s.totalSalary > 0) { 
+                    tb.innerHTML += `<tr><td>${y}년 ${displayMonth}월</td><td>${Math.round(s.totalSalary).toLocaleString()} 원</td><td>${s.nightDays}일</td><td>${s.specialDays}일</td><td>${s.vacationDays}일</td></tr>`; 
+                    total += s.totalSalary; 
+                } 
+            } 
+        }); 
+        document.getElementById('stats-total-sum').textContent = `총 합계: ${Math.round(total).toLocaleString()} 원`; 
+    };
+
+    const renderCustomHolidays = () => { document.getElementById('custom-holidays-list').innerHTML = ''; USER_DATA.settings.customHolidays.filter(h => !DEFAULT_HOLIDAYS_BASE.some(d => d.date === h.date)).forEach(h => addCustomHolidayInput(h.date, h.name)); };
+    const addCustomHolidayInput = (d = '', n = '') => { const c = document.getElementById('custom-holidays-list'); c.insertAdjacentHTML('beforeend', `<div style="display: flex; gap: 10px; margin-bottom: 5px;"><input type="date" value="${d}" onchange="saveCustomHolidays()"><input type="text" placeholder="공휴일 이름" value="${n}" oninput="saveCustomHolidays()"><button onclick="this.parentNode.remove(); saveCustomHolidays(); playSound('delete');" style="background:none;border:none;color:var(--color-error);font-size:1.2em;">&times;</button></div>`); };
+    const saveCustomHolidays = () => { const h = [...DEFAULT_HOLIDAYS_BASE]; const addedHolidays = new Set(DEFAULT_HOLIDAYS_BASE.map(d => d.date)); document.querySelectorAll('#custom-holidays-list > div').forEach(d => { const date = d.querySelector('input[type="date"]').value; const name = d.querySelector('input[type="text"]').value || '지정 공휴일'; if (date && !addedHolidays.has(date)) { h.push({ date, name }); } }); USER_DATA.settings.customHolidays = h; saveData(); generateCalendar(); };
+    const renderOvertimeSettings = () => { document.getElementById('overtime-list-container').innerHTML = ''; USER_DATA.settings.overtimeList.forEach(i => addOvertimeSettingItem(i.name, i.time)); };
+    const renderClassChangeHistory = () => { document.getElementById('class-change-history-list').innerHTML = ''; USER_DATA.settings.classChangeHistory.forEach(r => addClassChangeRecordInput(r.changeDate, r.newClass)); };
+    const addClassChangeRecordInput = (d = '', c = USER_DATA.class) => { const cont = document.getElementById('class-change-history-list'); const opts = ['A', 'B', 'C', 'D'].map(v => `<option value="${v}" ${v === c ? 'selected' : ''}>${v}반</option>`).join(''); cont.insertAdjacentHTML('beforeend', `<div class="change-record-row"><input type="date" value="${d}" onchange="saveClassChangeHistory()"><select onchange="saveClassChangeHistory()">${opts}</select><button onclick="this.parentNode.remove(); saveClassChangeHistory(); playSound('delete');" style="background:none;border:none;color:var(--color-error);font-size:1.2em;">&times;</button></div>`); };
+    const saveClassChangeHistory = () => { const h = []; document.querySelectorAll('#class-change-history-list > div').forEach(d => { const date = d.querySelector('input[type="date"]').value; const newClass = d.querySelector('select').value; if (date) h.push({ changeDate: date, newClass: newClass }); }); USER_DATA.settings.classChangeHistory = h; saveData(); generateCalendar(); };
+    const toggleTheme = (isLight) => { USER_DATA.settings.isLightMode = isLight; saveData(); applyTheme(isLight); };
+    const applyTheme = (isLight) => { document.documentElement.classList.toggle('light-mode', isLight); };
+    
     const openWorkRecordModal = (dateStr) => {
         document.getElementById('modal-date-title').textContent = `${dateStr} 근무 기록`;
         document.getElementById('modal-selected-date').value = dateStr;
@@ -881,638 +1030,24 @@ const DEFAULT_HOLIDAYS_BASE = [
             if (name && time > 0) overtimes.push({ name, time });
         });
         USER_DATA.workRecords[dateStr] = { date: dateStr, type, overtimes };
-        saveData();
-        updateDayCell(dateStr); updateSalary(); closeModal('work-record-modal');
+        saveData(); updateDayCell(dateStr); updateSalary(); closeModal('work-record-modal');
     };
-    const deleteWorkRecord = () => {
-        const dateStr = document.getElementById('modal-selected-date').value;
-        showConfirm(`${dateStr} 기록 삭제`, '정말로 삭제하시겠습니까?', () => {
-            delete USER_DATA.workRecords[dateStr];
-            saveData(); updateDayCell(dateStr); updateSalary(); closeModal('work-record-modal');
-        });
-    };
-    const addOvertimeRow = (isNew, name = '', time = '') => {
-        const container = document.getElementById('modal-overtime-list');
-        const row = document.createElement('div');
-        row.className = 'overtime-input-row';
-        const options = USER_DATA.settings.overtimeList.map(item => `<option value="${item.name}" ${item.name === name ? 'selected' : ''}>${item.name}</option>`).join('');
-        row.innerHTML = `<select><option value="">--- 선택 ---</option>${options}</select><input type="number" step="0.5" placeholder="시간" value="${time}" readonly><button onclick="this.parentNode.remove(); playSound('delete');" style="background:none; border:none; color:var(--color-error); font-size:1.2em; padding:0; cursor:pointer;">&times;</button>`;
-        row.querySelector('select').addEventListener('change', function() {
-            const selected = USER_DATA.settings.overtimeList.find(i => i.name === this.value);
-            this.nextElementSibling.value = selected ? selected.time : '';
-        });
-        container.appendChild(row);
-    };
-    
-    // --- Settings Functions ---
-    /* === [추가] 부호 전환 기능 함수 === */
-    const toggleSign = (inputElement) => {
-        // 입력창이 없거나 비어있으면 아무것도 안 함
-        if (!inputElement || inputElement.value === '') return;
-        
-        // 현재 값에 -1을 곱해서 부호 변경
-        inputElement.value = Number(inputElement.value) * -1;
-        
-        // 값이 바뀌었다는 것을 시스템에 알려서 저장되게 함
-        inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-    };
+    const deleteWorkRecord = () => { const dateStr = document.getElementById('modal-selected-date').value; showConfirm(`${dateStr} 기록 삭제`, '정말로 삭제하시겠습니까?', () => { delete USER_DATA.workRecords[dateStr]; saveData(); updateDayCell(dateStr); updateSalary(); closeModal('work-record-modal'); }); };
+    const addOvertimeRow = (isNew, name = '', time = '') => { const container = document.getElementById('modal-overtime-list'); const row = document.createElement('div'); row.className = 'overtime-input-row'; const options = USER_DATA.settings.overtimeList.map(item => `<option value="${item.name}" ${item.name === name ? 'selected' : ''}>${item.name}</option>`).join(''); row.innerHTML = `<select><option value="">--- 선택 ---</option>${options}</select><input type="number" step="0.5" placeholder="시간" value="${time}" readonly><button onclick="this.parentNode.remove(); playSound('delete');" style="background:none; border:none; color:var(--color-error); font-size:1.2em; padding:0; cursor:pointer;">&times;</button>`; row.querySelector('select').addEventListener('change', function() { const selected = USER_DATA.settings.overtimeList.find(i => i.name === this.value); this.nextElementSibling.value = selected ? selected.time : ''; }); container.appendChild(row); };
 
-    const saveBasePaySetting = () => { const key = getCurrentActivePeriodKey(); if (key) { USER_DATA.settings.basePays[key] = Number(document.getElementById('base-pay').value) || 0; saveData(); updateSalary(); } };
-    const saveRegularPayCheckSetting = () => { const key = getCurrentActivePeriodKey(); if (key) { USER_DATA.settings.regularPayChecks[key] = document.getElementById('regular-pay-check').checked; saveData(); updateSalary(); } };
-    const saveSettings = () => { USER_DATA.class = document.getElementById('setting-class').value; saveData(); generateCalendar(); };
-    const addOvertimeSettingItem = (name = '', time = 0.5) => { 
-         const container = document.getElementById('overtime-list-container');
-         const div = document.createElement('div');
-         let timeOptions = '';
-         for (let i = 0; i <= 10; i += 0.5) timeOptions += `<option value="${i}" ${i === time ? 'selected' : ''}>${i.toFixed(1)}h</option>`;
-         div.innerHTML = `<input type="text" placeholder="잔업 이름" value="${name}" oninput="saveOvertimeSettings()"><select onchange="saveOvertimeSettings()">${timeOptions}</select><button onclick="this.parentNode.remove(); saveOvertimeSettings(); playSound('delete');" style="background: none; border: none; color: var(--color-error); padding: 5px; font-size: 1.2em;">&times;</button>`;
-         container.appendChild(div);
-    };
-    const saveOvertimeSettings = () => {
-         const list = [];
-         document.querySelectorAll('#overtime-list-container > div').forEach(div => {
-             const name = div.querySelector('input[type="text"]').value;
-             const time = Number(div.querySelector('select').value);
-             if (name) list.push({ name, time });
-         });
-         USER_DATA.settings.overtimeList = list; saveData();
-    };
+    const scrollToTodayMonth = (id = null, isInitialLoad = false) => { const today = new Date(); const monthId = id || `month-${today.getFullYear()}-${today.getMonth()}`; const el = document.getElementById(monthId); if (el) { el.scrollIntoView({ behavior: 'auto', block: 'start' }); if (isInitialLoad) { clearTimeout(scrollTimeout); document.querySelectorAll('.calendar-month').forEach(m => m.classList.remove('active')); el.classList.add('active'); loadPeriodSettingsToUI(); } else { setTimeout(() => updateActiveMonth(), 50); } } };
+    const playSound = (type = 'click') => { if (USER_DATA.settings.isMuted) return; try { if (!audioCtx || audioCtx.state === 'closed') { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if (audioCtx.state === 'suspended') { audioCtx.resume(); } const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); oscillator.connect(gainNode); gainNode.connect(audioCtx.destination); gainNode.gain.setValueAtTime(0, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01); switch (type) { case 'toggle': oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(600, audioCtx.currentTime); break; case 'save': oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); break; case 'delete': oscillator.type = 'sawtooth'; oscillator.frequency.setValueAtTime(300, audioCtx.currentTime); break; case 'open': oscillator.type = 'triangle'; oscillator.frequency.setValueAtTime(700, audioCtx.currentTime); break; default: oscillator.type = 'triangle'; oscillator.frequency.setValueAtTime(500, audioCtx.currentTime); } oscillator.start(audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05); oscillator.stop(audioCtx.currentTime + 0.05); } catch (e) { console.error("Web Audio API Error:", e); } };
+    const toggleMute = (isSoundOn) => { USER_DATA.settings.isMuted = !isSoundOn; saveData(); if (isSoundOn) { playSound('toggle'); } };
 
-    // --- Generic Functions ---
-    const switchTab = (tabName) => { document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active')); document.getElementById(`tab-content-${tabName}`).style.display = 'block'; document.getElementById(`tab-${tabName}`).classList.add('active'); if (tabName === 'statistics') { populateStatsFilter(); renderStatistics(); } else if (tabName === 'calendar') { loadPeriodSettingsToUI(); } };
-    const closeModal = (modalId) => document.getElementById(modalId).style.display = 'none';
-    const showConfirm = (title, text, onOk) => { 
-        const modal = document.getElementById('confirm-modal');
-        document.getElementById('confirm-modal-title').textContent = title;
-        document.getElementById('confirm-modal-text').textContent = text;
-        const okBtn = document.getElementById('confirm-modal-ok');
-        const cancelBtn = document.getElementById('confirm-modal-cancel');
-        const okListener = () => { onOk(); close(); };
-        const cancelListener = () => close();
-        const close = () => { modal.style.display = 'none'; okBtn.removeEventListener('click', okWithSoundListener); cancelBtn.removeEventListener('click', cancelWithSoundListener); };
-        
-        const okWithSoundListener = () => { okListener(); playSound('save'); };
-        const cancelWithSoundListener = () => { cancelListener(); playSound('click'); };
-
-        okBtn.addEventListener('click', okWithSoundListener);
-        cancelBtn.addEventListener('click', cancelWithSoundListener);
-        modal.style.display = 'flex';
-    };
-    const resetAllData = () => showConfirm('데이터 초기화', '경고: 모든 저장된 데이터를 영구적으로 삭제하고 초기화하시겠습니까?', () => { localStorage.removeItem('smartSalaryApp_user_data'); window.location.reload(); }); 
-    const backupData = () => { const dataStr = JSON.stringify(USER_DATA); const blob = new Blob([dataStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `smartSalaryApp_backup_${formatDate(new Date())}.json`; a.click(); URL.revokeObjectURL(a.href); };
-    const restoreData = (event) => { const file = event.target.files[0]; if (!file) return; showConfirm('데이터 복구', '현재 데이터를 덮어쓰고 복구하시겠습니까?', () => { const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (!data.account) throw new Error("Invalid data"); localStorage.setItem('smartSalaryApp_user_data', JSON.stringify(data)); window.location.reload(); } catch (err) { alert('복구 실패: 잘못된 파일입니다.'); } }; reader.readAsText(file); }); event.target.value = ''; };
-
-    const toggleSalaryDetails = () => { const collapsed = document.getElementById('salary-input-section').classList.toggle('collapsed'); document.getElementById('salary-details-container').classList.toggle('collapsed'); document.getElementById('toggle-salary-details').textContent = collapsed ? '▲' : '▼'; USER_DATA.settings.isSalaryDetailsCollapsed = collapsed; saveData(); };
-    const copyPreviousMonthBasePay = () => { const prevKey = getPreviousPeriodKey(getCurrentActivePeriodKey()); const prevPay = USER_DATA.settings.basePays[prevKey] || 0; if (prevPay > 0) { document.getElementById('base-pay').value = prevPay; saveBasePaySetting(); } };
-    
-    const copyPreviousMonthAdditionalItems = () => {
-        const currentKey = getCurrentActivePeriodKey();
-        if (!currentKey) return;
-        const prevKey = getPreviousPeriodKey(currentKey);
-        if (!prevKey) return;
-        const previousItems = USER_DATA.settings.additionalItemsByPeriod[prevKey];
-        if (previousItems && previousItems.length > 0) {
-            USER_DATA.settings.additionalItemsByPeriod[currentKey] = JSON.parse(JSON.stringify(previousItems)); 
-            saveData();
-            renderAdditionalItems(currentKey);
-            updateSalary();
-        } else {
-            alert('지난 달에 저장된 추가 수당 목록이 없습니다.');
-        }
-    };
-
-    /* === [수정] 추가 수당 항목 생성 함수 (버튼 추가됨) === */
-    const addAdditionalItem = (n = '', a = '') => { 
-        const c = document.getElementById('additional-items-list'); 
-        const d = document.createElement('div'); 
-        
-        // 레이아웃: [이름 입력] [금액 입력] [+/- 버튼] [삭제 버튼]
-        d.innerHTML = `
-            <input type="text" placeholder="수당 이름" value="${n}" oninput="saveAdditionalItems()">
-            
-            <input type="number" inputmode="decimal" placeholder="금액" value="${a}" oninput="saveAdditionalItems()" style="flex: 1;">
-            
-            <button onclick="toggleSign(this.previousElementSibling); playSound('click');" 
-                style="background-color: var(--color-disabled); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 4px; font-weight: bold; width: 40px; height: 34px; margin-left: 5px; cursor: pointer; flex: 0 0 40px; padding: 0;">+/-</button>
-                
-            <button onclick="this.parentNode.remove(); saveAdditionalItems(); playSound('delete');" 
-                style="background: none; border: none; color: var(--color-error); padding: 5px; font-size: 1.2em; flex: 0 0 30px;">&times;</button>
-        `; 
-        c.appendChild(d); 
-    };
-
-    const renderAdditionalItems = key => { const c = document.getElementById('additional-items-list'); c.innerHTML = ''; if (key) (USER_DATA.settings.additionalItemsByPeriod[key] || []).forEach(i => addAdditionalItem(i.name, i.amount)); };
-    
-    const saveAdditionalItems = () => { 
-        const key = getCurrentActivePeriodKey(); 
-        if (!key) return; 
-        const items = []; 
-        document.querySelectorAll('#additional-items-list > div').forEach(d => { 
-            // input 순서 중요: 0번은 이름, 1번은 금액
-            const inputs = d.querySelectorAll('input');
-            const n = inputs[0].value;
-            const a = Number(inputs[1].value); 
-            if (n) items.push({ name: n, amount: a }); 
-        }); 
-        USER_DATA.settings.additionalItemsByPeriod[key] = items; 
-        saveData(); 
-        updateSalary(); 
-    };
-
-    const populateStatsFilter = () => { const yf = document.getElementById('stats-year-filter'); const years = new Set(); Object.keys(USER_DATA.settings.basePays).forEach(k => years.add(k.substring(0, 4))); Object.keys(USER_DATA.workRecords).forEach(d => years.add(d.substring(0, 4))); years.add(new Date().getFullYear().toString()); const sorted = Array.from(years).sort((a, b) => b - a); yf.innerHTML = '<option value="all">전체 년도</option>'; sorted.forEach(y => yf.innerHTML += `<option value="${y}">${y}년</option>`); yf.value = new Date().getFullYear(); };
-    const renderStatistics = () => { const yVal = document.getElementById('stats-year-filter').value, mVal = Number(document.getElementById('stats-month-filter').value), tb = document.getElementById('stats-table-body'); tb.innerHTML = ''; let years = yVal === 'all' ? Array.from(document.getElementById('stats-year-filter').options).map(o => o.value).filter(v => v !== 'all') : [yVal]; let total = 0; years.forEach(y => { for (let m = (mVal || 1); m <= (mVal || 12); m++) { const key = `${y}-${String(m).padStart(2, '0')}`; const s = calculatePeriodStats(key); if (s.totalSalary > 0) { tb.innerHTML += `<tr><td>${y}년 ${m}월</td><td>${Math.round(s.totalSalary).toLocaleString()} 원</td><td>${s.nightDays}일</td><td>${s.specialDays}일</td><td>${s.vacationDays}일</td></tr>`; total += s.totalSalary; } } }); document.getElementById('stats-total-sum').textContent = `총 합계: ${Math.round(total).toLocaleString()} 원`; };
-    const renderCustomHolidays = () => { document.getElementById('custom-holidays-list').innerHTML = ''; USER_DATA.settings.customHolidays.filter(h => !DEFAULT_HOLIDAYS_BASE.some(d => d.date === h.date)).forEach(h => addCustomHolidayInput(h.date, h.name)); };
-    const addCustomHolidayInput = (d = '', n = '') => { 
-        const c = document.getElementById('custom-holidays-list'); 
-        c.insertAdjacentHTML('beforeend', `<div style="display: flex; gap: 10px; margin-bottom: 5px;"><input type="date" value="${d}" onchange="saveCustomHolidays()"><input type="text" placeholder="공휴일 이름" value="${n}" oninput="saveCustomHolidays()"><button onclick="this.parentNode.remove(); saveCustomHolidays(); playSound('delete');" style="background:none;border:none;color:var(--color-error);font-size:1.2em;">&times;</button></div>`); 
-    };
-    const saveCustomHolidays = () => { 
-        const h = [...DEFAULT_HOLIDAYS_BASE];
-        const addedHolidays = new Set(DEFAULT_HOLIDAYS_BASE.map(d => d.date));
-        document.querySelectorAll('#custom-holidays-list > div').forEach(d => { 
-            const date = d.querySelector('input[type="date"]').value; 
-            const name = d.querySelector('input[type="text"]').value || '지정 공휴일';
-            if (date && !addedHolidays.has(date)) {
-                 h.push({ date, name }); 
-            }
-        }); 
-        USER_DATA.settings.customHolidays = h; saveData(); generateCalendar(); 
-    };
-    const renderOvertimeSettings = () => { document.getElementById('overtime-list-container').innerHTML = ''; USER_DATA.settings.overtimeList.forEach(i => addOvertimeSettingItem(i.name, i.time)); };
-    const renderClassChangeHistory = () => { document.getElementById('class-change-history-list').innerHTML = ''; USER_DATA.settings.classChangeHistory.forEach(r => addClassChangeRecordInput(r.changeDate, r.newClass)); };
-    const addClassChangeRecordInput = (d = '', c = USER_DATA.class) => { 
-        const cont = document.getElementById('class-change-history-list'); 
-        const opts = ['A', 'B', 'C', 'D'].map(v => `<option value="${v}" ${v === c ? 'selected' : ''}>${v}반</option>`).join(''); 
-        cont.insertAdjacentHTML('beforeend', `<div class="change-record-row"><input type="date" value="${d}" onchange="saveClassChangeHistory()"><select onchange="saveClassChangeHistory()">${opts}</select><button onclick="this.parentNode.remove(); saveClassChangeHistory(); playSound('delete');" style="background:none;border:none;color:var(--color-error);font-size:1.2em;">&times;</button></div>`); 
-    };
-    const saveClassChangeHistory = () => { const h = []; document.querySelectorAll('#class-change-history-list > div').forEach(d => { const date = d.querySelector('input[type="date"]').value; if (date) h.push({ changeDate: date, newClass: d.querySelector('select').value }); }); USER_DATA.settings.classChangeHistory = h; saveData(); generateCalendar(); };
-    const toggleTheme = (isLight) => { USER_DATA.settings.isLightMode = isLight; saveData(); applyTheme(isLight); };
-    
-    const applyTheme = (isLight) => {
-        document.documentElement.classList.toggle('light-mode', isLight);
-        if (isLight) {
-            document.querySelectorAll('.snowflake, .twinkle').forEach(el => el.remove());
-        }
-    };
-    
-    const scrollToTodayMonth = (id = null, isInitialLoad = false) => {
-        const today = new Date(); 
-        const monthId = id || `month-${today.getFullYear()}-${today.getMonth()}`; 
-        const el = document.getElementById(monthId); 
-        if (el) { 
-            el.scrollIntoView({ behavior: 'auto', block: 'start' }); 
-
-            if (isInitialLoad) {
-                clearTimeout(scrollTimeout);
-                document.querySelectorAll('.calendar-month').forEach(m => m.classList.remove('active'));
-                el.classList.add('active');
-                loadPeriodSettingsToUI();
-            } else {
-                setTimeout(() => updateActiveMonth(), 50); 
-            }
-        } 
-    };
-
-    // --- Sound Functions ---
-    const playSound = (type = 'click') => {
-        if (USER_DATA.settings.isMuted) return;
-
-        try {
-            if (!audioCtx || audioCtx.state === 'closed') {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01);
-            switch (type) {
-                case 'toggle': oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(600, audioCtx.currentTime); break;
-                case 'save': oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); break;
-                case 'delete': oscillator.type = 'sawtooth'; oscillator.frequency.setValueAtTime(300, audioCtx.currentTime); break;
-                case 'open': oscillator.type = 'triangle'; oscillator.frequency.setValueAtTime(700, audioCtx.currentTime); break;
-                default: oscillator.type = 'triangle'; oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
-            }
-            oscillator.start(audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
-            oscillator.stop(audioCtx.currentTime + 0.05);
-        } catch (e) {
-            console.error("Web Audio API Error:", e);
-        }
-    };
-    const toggleMute = (isSoundOn) => {
-        USER_DATA.settings.isMuted = !isSoundOn;
-        saveData();
-        if (isSoundOn) {
-            playSound('toggle');
-        }
-    };
-
-    // --- Event Listeners ---
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('tab-calendar').addEventListener('click', () => { switchTab('calendar'); playSound('open'); });
         document.getElementById('tab-statistics').addEventListener('click', () => { switchTab('statistics'); playSound('open'); });
         document.getElementById('tab-settings').addEventListener('click', () => { switchTab('settings'); playSound('open'); });
         document.getElementById('today-button').addEventListener('click', () => { scrollToTodayMonth(); playSound('click'); });
         document.getElementById('work-type-group').addEventListener('change', () => document.getElementById('modal-overtime-list').innerHTML = ''); 
-        
         loadData();
+        checkStartupMessage(); // 앱 시작 시 팝업 메시지 확인
     });
 </script>
-
-<script>
-    /* === 🎄 Ultimate Premium Carol Engine (Ver 8.0 - Full Songs & New Track) === */
-    
-    // [1] 고급 오디오 컨텍스트 및 변수 설정
-    let musicCtx = null;
-    let masterGain = null;
-    let analyser = null;
-    let reverbNode = null;
-    let compressor = null;
-    
-    let isPlaying = false;
-    let schedulerTimer = null;
-    let animationFrameId = null;
-
-    // 음악 스케줄링 변수
-    let nextNoteTime = 0.0;
-    let currentNoteIndex = 0;
-    let currentSongIndex = 0;
-    const LOOKAHEAD = 25.0; 
-    const SCHEDULE_AHEAD_TIME = 0.1;
-
-    // [2] 주파수 데이터 (음역대 확장)
-    const NOTES = {
-        'G2': 98.00, 'A2': 110.00, 'B2': 123.47,
-        'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 184.99, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
-        'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
-        'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77,
-        'C6': 1046.50, 'D6': 1174.66, 'E6': 1318.51,
-        'R': 0 // 쉼표
-    };
-
-    /* === 🎼 악보 데이터 (Full Version) === */
-    // 구조: [멜로디, 베이스, 박자]
-    
-    // 1. 징글벨 (Verse + Chorus Full)
-    const SONG_JINGLE = {
-        tempo: 170,
-        melody: [
-            // [Verse] Dashing through the snow
-            ['G4','C3',1], ['E5','C3',1], ['D5','G3',1], ['C5','E3',1], ['G4','C3',3], ['G4','G3',1],
-            ['G4','C3',1], ['E5','C3',1], ['D5','G3',1], ['C5','E3',1], ['A4','F3',3], ['A4','F3',1],
-            ['A4','F3',1], ['F5','F3',1], ['E5','A3',1], ['D5','D3',1], ['B4','G3',3], ['G4','G3',1],
-            ['G4','G3',1], ['E5','C3',1], ['D5','B2',1], ['F5','G3',1], ['C5','C3',3], ['G4','G3',1],
-            
-            // [Chorus] Jingle Bells
-            ['E4','C3',1], ['E4','G3',1], ['E4','C3',2], // Jingle bells
-            ['E4','C3',1], ['E4','G3',1], ['E4','C3',2], // Jingle bells
-            ['E4','C3',1], ['G4','E3',1], ['C4','C3',1.5], ['D4','',0.5], ['E4','C3',4], // Jingle all the way
-            ['F4','F3',1], ['F4','A3',1], ['F4','F3',1.5], ['F4','',0.5], // Oh what fun
-            ['F4','F3',1], ['E4','C3',1], ['E4','E3',1], ['E4','',1],
-            ['E4','C3',1], ['D4','G3',1], ['D4','B2',1], ['E4','G3',1], ['D4','G3',2], ['G4','B2',2], // One horse open sleigh
-            
-            // [Chorus Repeat]
-            ['E4','C3',1], ['E4','G3',1], ['E4','C3',2], 
-            ['E4','C3',1], ['E4','G3',1], ['E4','C3',2], 
-            ['E4','C3',1], ['G4','E3',1], ['C4','C3',1.5], ['D4','',0.5], ['E4','C3',4], 
-            ['F4','F3',1], ['F4','A3',1], ['F4','F3',1.5], ['F4','',0.5], 
-            ['F4','F3',1], ['E4','C3',1], ['E4','E3',1], ['E4','',1],
-            ['G4','G3',1], ['G4','G3',1], ['F4','G3',1], ['D4','B2',1], ['C4','C3',3], ['R','',1]
-        ]
-    };
-
-    // 2. We Wish You A Merry Christmas (Full Structure)
-    const SONG_WISH = {
-        tempo: 140,
-        melody: [
-            // Chorus
-            ['D4','G3',1], ['G4','C3',1], ['G4','',0.5], ['A4','',0.5], ['G4','E3',1], ['F#4','D3',1], ['E4','C3',1], ['C4','C3',1], ['E4','C3',1],
-            ['A4','F3',1], ['A4','',0.5], ['B4','',0.5], ['A4','F3',1], ['G4','E3',1], ['F#4','D3',1], ['D4','D3',1], ['F#4','D3',1],
-            ['B4','G3',1], ['B4','',0.5], ['C5','',0.5], ['B4','G3',1], ['A4','F#3',1], ['E4','E3',1], ['D4','D3',0.5], ['D4','',0.5], ['E4','E3',1],
-            ['A4','F3',1], ['F#4','D3',1], ['G4','G3',2],
-            
-            // Bridge (Good tidings we bring)
-            ['D4','G3',1], ['G4','C3',1], ['G4','C3',1], ['G4','C3',1], ['F#4','D3',2], ['F#4','D3',1],
-            ['G4','E3',1], ['F#4','D3',1], ['E4','C3',1], ['D4','B2',2], ['A4','D3',1],
-            ['B4','G3',1], ['A4','F#3',0.5], ['A4','',0.5], ['G4','E3',1], ['D5','D3',1], ['D4','',0.5], ['D4','',0.5], ['D4','D3',1],
-            ['E4','C3',1], ['A4','F3',1], ['F#4','D3',1], ['G4','G3',3]
-        ]
-    };
-
-    // 3. 루돌프 사슴코 (Rudolph The Red-Nosed Reindeer) - NEW!
-    const SONG_RUDOLPH = {
-        tempo: 150, // 통통 튀게
-        melody: [
-            // Rudolph the red-nosed reindeer
-            ['G4','C3',0.5], ['A4','',0.5], ['G4','E3',0.5], ['E4','',1], ['C5','C3',1], ['A4','F3',1], ['G4','C3',1.5], ['R','',0.5],
-            ['G4','G3',0.5], ['A4','',0.5], ['G4','',0.5], ['A4','F3',0.5], ['G4','',1], ['C5','E3',1], ['B4','G3',3],
-            // Had a very shiny nose
-            ['F4','G3',0.5], ['G4','',0.5], ['F4','D3',0.5], ['D4','',1], ['B4','G3',1], ['A4','F3',1], ['G4','C3',1.5], ['R','',0.5],
-            ['G4','C3',0.5], ['A4','',0.5], ['G4','',0.5], ['A4','F3',0.5], ['G4','',1], ['A4','',1], ['E4','C3',3],
-            // And if you ever saw it
-            ['G4','C3',0.5], ['A4','',0.5], ['G4','E3',0.5], ['E4','',1], ['C5','C3',1], ['A4','F3',1], ['G4','C3',1.5], ['R','',0.5],
-            ['G4','G3',0.5], ['A4','',0.5], ['G4','',0.5], ['A4','F3',0.5], ['G4','',1], ['C5','E3',1], ['B4','G3',3],
-            // You would even say it glows
-            ['F4','G3',0.5], ['G4','',0.5], ['F4','D3',0.5], ['D4','',1], ['B4','G3',1], ['A4','F3',1], ['G4','C3',1.5], ['R','',0.5],
-            ['G4','C3',0.5], ['A4','',0.5], ['G4','',0.5], ['A4','F3',0.5], ['G4','',1], ['D5','G3',1], ['C5','C3',3],
-            // Bridge (Then one foggy...)
-            ['A4','F3',1], ['A4','',1], ['C5','A3',1], ['A4','',1], ['G4','E3',1], ['E4','',1], ['G4','C3',1], ['R','',1], // Foggy Christmas eve
-            ['F4','D3',1], ['A4','',1], ['G4','E3',1], ['F4','',1], ['E4','C3',3], ['R','',1], // Santa came to say
-            ['D4','G3',1], ['E4','',1], ['G4','B2',1], ['A4','',1], ['B4','G3',1], ['B4','',1], ['B4','',1], // Rudolph with your
-            ['C5','C3',1], ['B4','',1], ['A4','F3',1], ['G4','',1], ['F4','D3',1], ['D4','',1], // Nose so bright
-            // Won't you guide my sleigh tonight (Ending Variation)
-            ['G4','G3',0.5], ['A4','',0.5], ['G4','',0.5], ['A4','',0.5], ['G4','G3',1], ['D5','B2',1], ['C5','C3',4] 
-        ]
-    };
-
-    // 4. 고요한 밤 거룩한 밤 (Silent Night) - Calm Ending
-    const SONG_SILENT = {
-        tempo: 90,
-        melody: [
-            ['G4','C3',1.5], ['A4','E3',0.5], ['G4','G3',1], ['E4','C3',3],
-            ['G4','C3',1.5], ['A4','E3',0.5], ['G4','G3',1], ['E4','C3',3],
-            ['D5','G3',2], ['D5','B2',1], ['B4','G3',3],
-            ['C5','C3',2], ['C5','G3',1], ['G4','E3',3],
-            ['A4','F3',2], ['A4','A3',1], ['C5','F3',1.5], ['B4','',0.5], ['A4','',1],
-            ['G4','C3',1.5], ['A4','E3',0.5], ['G4','G3',1], ['E4','C3',3],
-            ['D5','G3',2], ['F5','B2',1], ['D5','D4',1.5], ['B4','',0.5], ['C5','C3',3],
-            ['C5','G3',1.5], ['G4','',0.5], ['E4','',1], ['G4','G3',1.5], ['F4','',0.5], ['D4','B2',1],
-            ['C4','C3',4], ['R','',2] // Calm finish
-        ]
-    };
-
-    const PLAYLIST = [SONG_JINGLE, SONG_RUDOLPH, SONG_WISH, SONG_SILENT];
-
-    /* === 🔊 Audio Engine 구현 === */
-
-    // 1. 공간감 리버브 생성
-    function createReverbBuffer(ctx) {
-        const length = ctx.sampleRate * 2.5; 
-        const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
-        const left = impulse.getChannelData(0);
-        const right = impulse.getChannelData(1);
-        for (let i = 0; i < length; i++) {
-            const decay = Math.pow(1 - i / length, 2); 
-            left[i] = (Math.random() * 2 - 1) * decay;
-            right[i] = (Math.random() * 2 - 1) * decay;
-        }
-        return impulse;
-    }
-
-    function initMusicAudio() {
-        if (musicCtx) return;
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        musicCtx = new AudioContext();
-
-        // 마스터 볼륨
-        masterGain = musicCtx.createGain();
-        masterGain.gain.value = 0; 
-        
-        // 컴프레서
-        compressor = musicCtx.createDynamicsCompressor();
-        compressor.threshold.setValueAtTime(-24, musicCtx.currentTime);
-        compressor.knee.setValueAtTime(30, musicCtx.currentTime);
-        compressor.ratio.setValueAtTime(12, musicCtx.currentTime);
-        compressor.attack.setValueAtTime(0.003, musicCtx.currentTime);
-        compressor.release.setValueAtTime(0.25, musicCtx.currentTime);
-
-        // 리버브
-        reverbNode = musicCtx.createConvolver();
-        reverbNode.buffer = createReverbBuffer(musicCtx);
-        
-        // 리버브 믹스
-        const reverbGain = musicCtx.createGain();
-        reverbGain.gain.value = 0.4; 
-
-        // 분석기
-        analyser = musicCtx.createAnalyser();
-        analyser.fftSize = 256;
-
-        masterGain.connect(compressor);
-        compressor.connect(analyser); 
-        compressor.connect(musicCtx.destination);
-        
-        compressor.connect(reverbNode);
-        reverbNode.connect(reverbGain);
-        reverbGain.connect(musicCtx.destination);
-    }
-
-    // 2. 악기 사운드 디자인 (EP/Bell + Soft Bass)
-    function playMusicTone(freq, type, duration, time, vol) {
-        if (!freq || freq <= 0) return;
-
-        const osc = musicCtx.createOscillator();
-        const gain = musicCtx.createGain();
-        
-        if (type === 'melody') {
-            osc.type = 'triangle'; 
-            osc.frequency.setValueAtTime(freq, time);
-            
-            gain.gain.setValueAtTime(0, time);
-            gain.gain.linearRampToValueAtTime(vol * 1.0, time + 0.02); 
-            gain.gain.exponentialRampToValueAtTime(vol * 0.6, time + 0.1); 
-            gain.gain.exponentialRampToValueAtTime(0.01, time + duration + 0.5); 
-
-            // Bell Layer (Octave up)
-            const osc2 = musicCtx.createOscillator();
-            const gain2 = musicCtx.createGain();
-            osc2.type = 'sine';
-            osc2.frequency.setValueAtTime(freq * 2, time); 
-            gain2.gain.setValueAtTime(0, time);
-            gain2.gain.linearRampToValueAtTime(vol * 0.3, time + 0.02);
-            gain2.gain.exponentialRampToValueAtTime(0.01, time + 0.3); 
-            
-            osc2.connect(gain2);
-            gain2.connect(masterGain);
-            osc2.start(time);
-            osc2.stop(time + duration + 1);
-
-        } else {
-            // Bass Layer
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, time);
-            
-            gain.gain.setValueAtTime(0, time);
-            gain.gain.linearRampToValueAtTime(vol * 0.8, time + 0.05);
-            gain.gain.linearRampToValueAtTime(vol * 0.6, time + duration * 0.8);
-            gain.gain.linearRampToValueAtTime(0, time + duration + 0.1);
-        }
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-        osc.start(time);
-        osc.stop(time + duration + 1.0); 
-    }
-
-    // 3. 스케줄러
-    function nextNote() {
-        const song = PLAYLIST[currentSongIndex];
-        const secondsPerBeat = 60.0 / song.tempo;
-        
-        nextNoteTime += song.melody[currentNoteIndex][2] * secondsPerBeat;
-        
-        currentNoteIndex++;
-        if (currentNoteIndex >= song.melody.length) {
-            currentSongIndex = (currentSongIndex + 1) % PLAYLIST.length;
-            currentNoteIndex = 0;
-            nextNoteTime += 2.0; 
-        }
-    }
-
-    function scheduleNote(noteIndex, time) {
-        const song = PLAYLIST[currentSongIndex];
-        const noteData = song.melody[noteIndex];
-        const secondsPerBeat = 60.0 / song.tempo;
-        const duration = noteData[2] * secondsPerBeat;
-
-        const melodyFreq = NOTES[noteData[0]];
-        const bassFreq = NOTES[noteData[1]];
-
-        if (melodyFreq) playMusicTone(melodyFreq, 'melody', duration, time, 0.25);
-        if (bassFreq) playMusicTone(bassFreq, 'bass', duration, time, 0.2);
-    }
-
-    function scheduler() {
-        while (nextNoteTime < musicCtx.currentTime + SCHEDULE_AHEAD_TIME) {
-            scheduleNote(currentNoteIndex, nextNoteTime);
-            nextNote();
-        }
-        if (isPlaying) {
-            schedulerTimer = requestAnimationFrame(scheduler);
-        }
-    }
-
-    /* === ❄️ Music Visualizer & Snowflake Engine === */
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.style.position = 'fixed';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '9990'; 
-    document.body.appendChild(canvas);
-
-    let snowflakes = [];
-    
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    class Snowflake {
-        constructor() { this.init(); }
-        init(y = -10) {
-            this.x = Math.random() * canvas.width;
-            this.y = y;
-            this.size = Math.random() * 3 + 1; 
-            this.speed = Math.random() * 1 + 0.5;
-            this.drift = Math.random() * Math.PI * 2;
-            this.opacity = Math.random() * 0.5 + 0.3;
-            this.baseSize = this.size;
-            this.beatScale = 1.0; 
-        }
-        update(energy, isBeat) {
-            const speedBoost = energy > 50 ? (energy / 50) : 1; 
-            this.y += this.speed * speedBoost;
-            this.x += Math.sin(this.drift) * 0.5;
-            this.drift += 0.02;
-            if (isBeat) this.beatScale = 1.5;
-            if (this.beatScale > 1.0) this.beatScale -= 0.05;
-            if (this.y > canvas.height) this.init();
-        }
-        draw() {
-            if (document.documentElement.classList.contains('light-mode')) return;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.baseSize * this.beatScale, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-            ctx.fill();
-        }
-    }
-
-    for (let i = 0; i < 50; i++) {
-        snowflakes.push(new Snowflake());
-        snowflakes[i].y = Math.random() * canvas.height;
-    }
-
-    function animateVisualizer() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let energy = 0;
-        let isBeat = false;
-
-        if (isPlaying && analyser) {
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
-            let bassSum = 0;
-            for(let i=0; i<10; i++) bassSum += dataArray[i];
-            energy = bassSum / 10;
-            if (energy > 140) isBeat = true;
-        }
-
-        snowflakes.forEach(flake => {
-            flake.update(energy, isBeat);
-            flake.draw();
-        });
-        const stars = document.querySelectorAll('.twinkle');
-        stars.forEach(star => { if(isBeat) star.style.opacity = 1; });
-        animationFrameId = requestAnimationFrame(animateVisualizer);
-    }
-    animateVisualizer();
-
-    /* === 🎛️ UI Control === */
-    function toggleMusic() {
-        const btn = document.getElementById('music-toggle');
-        if (!isPlaying) {
-            initMusicAudio();
-            if (musicCtx.state === 'suspended') musicCtx.resume();
-            isPlaying = true;
-            nextNoteTime = musicCtx.currentTime + 0.1;
-            currentNoteIndex = 0;
-            masterGain.gain.setValueAtTime(0, musicCtx.currentTime);
-            masterGain.gain.linearRampToValueAtTime(1.0, musicCtx.currentTime + 2.0);
-            scheduler(); 
-            btn.textContent = '⏸️ 음악 끄기';
-            btn.classList.add('playing');
-        } else {
-            const fadeOutTime = 1.5;
-            masterGain.gain.cancelScheduledValues(musicCtx.currentTime);
-            masterGain.gain.setValueAtTime(masterGain.gain.value, musicCtx.currentTime);
-            masterGain.gain.linearRampToValueAtTime(0, musicCtx.currentTime + fadeOutTime);
-            setTimeout(() => {
-                isPlaying = false;
-                cancelAnimationFrame(schedulerTimer);
-            }, fadeOutTime * 1000);
-            btn.textContent = '🎵 음악 켜기';
-            btn.classList.remove('playing');
-        }
-    }
-    
-    function createStars(count = 30) {
-        for (let i = 0; i < count; i++) {
-            const star = document.createElement('div');
-            star.classList.add('twinkle');
-            const size = Math.random() * 3 + 1;
-            star.style.width = star.style.height = size + 'px';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.animationDelay = Math.random() * 5 + 's';
-            document.body.appendChild(star);
-        }
-    }
-
-    window.addEventListener('load', () => {
-        createStars();
-        const btn = document.getElementById('music-toggle');
-        if (btn) btn.addEventListener('click', toggleMusic);
-    });
-</script>
-	
+</body>
+</html>

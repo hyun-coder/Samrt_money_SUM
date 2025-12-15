@@ -202,17 +202,19 @@
                     <div class="checkbox-group" id="regular-pay-group">
                         <label for="regular-pay-check">통상임금 포함</label>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="regular-pay-check" onchange="saveRegularPayCheckSetting(); playSound('toggle');">
+                            <input type="checkbox" id="regular-pay-check">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <hr>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                        <label style="font-size: 0.9em; margin-bottom: 0;">추가 수당 목록 (현재 기간에만 적용):</label>
-                        <button onclick="copyPreviousMonthAdditionalItems(); playSound('click');" style="background-color: var(--color-secondary); color: var(--color-bg); padding: 5px 10px; border: none; border-radius: 4px; font-size: 0.8em; line-height: 1.2; text-align: center; cursor: pointer;">지난달 수당</button>
+                    <div id="additional-items-wrapper">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <label style="font-size: 0.9em; margin-bottom: 0;">추가 수당 목록 <span id="additional-items-label-suffix"></span>:</label>
+                            <button onclick="copyPreviousMonthAdditionalItems(); playSound('click');" style="background-color: var(--color-secondary); color: var(--color-bg); padding: 5px 10px; border: none; border-radius: 4px; font-size: 0.8em; line-height: 1.2; text-align: center; cursor: pointer;">지난달/구간 복사</button>
+                        </div>
+                        <div id="additional-items-list"></div>
+                        <button onclick="addAdditionalItem(); playSound('click');" style="background-color: var(--color-disabled); color: var(--color-text); padding: 5px 10px; border: none; border-radius: 4px; margin-top: 5px;">+ 추가 항목</button>
                     </div>
-                    <div id="additional-items-list"></div>
-                    <button onclick="addAdditionalItem(); playSound('click');" style="background-color: var(--color-disabled); color: var(--color-text); padding: 5px 10px; border: none; border-radius: 4px; margin-top: 5px;">+ 추가 항목</button>
                 </div>
             </section>
             <div id="calendar-view"></div>
@@ -366,7 +368,7 @@
 
 <script>
     /* === (시작) 메인 앱 스크립트 === */
-    const CURRENT_APP_VERSION = "2.1.5"; // 버전 업데이트
+    const CURRENT_APP_VERSION = "2.2.0"; // 버전 업데이트
     const DEFAULT_OVERTIME_MAP = { '주간': 3.0, '야간': 4.5, '야간퇴근(칠서)': 2.5, '주간특근': 0.5, '야간특근': 7.0, '17시퇴근': 0.5 };
     const MESSAGE_STORAGE_KEY = 'smartSalaryApp_startup_message'; 
     
@@ -397,7 +399,8 @@
             prevYearBasePays: {}, // 1월: 전년도(12일)
             regularPayChecks: {}, // 1월: 신년도 통상임금
             prevYearRegularPayChecks: {}, // 1월: 전년도 통상임금 (신규 추가)
-            additionalItemsByPeriod: {}, 
+            additionalItemsByPeriod: {}, // 1월: 신년도 수당
+            prevYearAdditionalItemsByPeriod: {}, // 1월: 전년도 수당 (신규 추가)
             customHolidays: DEFAULT_HOLIDAYS_BASE,
             isSalaryDetailsCollapsed: false, 
             classChangeHistory: [], 
@@ -430,6 +433,7 @@
         if (!loadedData.settings) loadedData.settings = {};
         if (!loadedData.settings.prevYearBasePays) loadedData.settings.prevYearBasePays = {}; 
         if (!loadedData.settings.prevYearRegularPayChecks) loadedData.settings.prevYearRegularPayChecks = {}; 
+        if (!loadedData.settings.prevYearAdditionalItemsByPeriod) loadedData.settings.prevYearAdditionalItemsByPeriod = {};
 
         const existingCustomHolidays = loadedData.settings?.customHolidays || [];
         const allHolidays = new Map(DEFAULT_HOLIDAYS_BASE.map(h => [h.date, h]));
@@ -468,8 +472,8 @@
             nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0,
             
             // 내부 계산용: 분리된 통계
-            prevPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0 },
-            currPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0 }
+            prevPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0, additionalAmount: 0 },
+            currPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0, additionalAmount: 0 }
         };
 
         const period = getSalaryPeriodByPeriodKey(periodKey);
@@ -560,9 +564,12 @@
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // --- 3. UI 표시용 통계 합산 (전체 합계용) ---
-        const additionalItems = USER_DATA.settings.additionalItemsByPeriod[periodKey] || [];
-        const totalAdditionalAmount = additionalItems.reduce((sum, item) => sum + item.amount, 0);
+        // --- 3. 추가 수당 합산 (분리 적용) ---
+        const additionalItemsCurr = USER_DATA.settings.additionalItemsByPeriod[periodKey] || [];
+        const additionalItemsPrev = isJanuary ? (USER_DATA.settings.prevYearAdditionalItemsByPeriod[periodKey] || []) : [];
+        
+        stats.currPart.additionalAmount = additionalItemsCurr.reduce((sum, item) => sum + item.amount, 0);
+        stats.prevPart.additionalAmount = additionalItemsPrev.reduce((sum, item) => sum + item.amount, 0);
 
         // 전체 급여 합계
         stats.totalSalary = stats.basePay 
@@ -570,7 +577,7 @@
                             + stats.prevPart.specialOTAmount + stats.currPart.specialOTAmount
                             + stats.prevPart.specialAmount + stats.currPart.specialAmount
                             + stats.prevPart.nightAmount + stats.currPart.nightAmount
-                            + totalAdditionalAmount;
+                            + stats.prevPart.additionalAmount + stats.currPart.additionalAmount;
                             
         // [FIXED] 1월(분할 계산)인 경우에도 통계 표시에 사용할 일수 합산 로직 추가
         if (isJanuary) {
@@ -766,11 +773,15 @@
                         <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--color-primary);"><span>합계:</span> <span>${totalVal.toLocaleString()}원</span></div>
                     </div>
                 `;
-                // 통상임금 체크박스 숨기거나 비활성화 (개별 설정이므로 통합 탭에선 설정 불가)
+                // 통상임금 체크박스 & 추가수당 리스트 숨기기
                 document.getElementById('regular-pay-group').style.display = 'none';
+                document.getElementById('additional-items-wrapper').style.display = 'none';
 
             } else if (currentJanTab === 'prev') {
                 document.getElementById('regular-pay-group').style.display = 'flex';
+                document.getElementById('additional-items-wrapper').style.display = 'block';
+                document.getElementById('additional-items-label-suffix').textContent = '(전년도 구간)';
+                
                 const prevVal = USER_DATA.settings.prevYearBasePays[currentKey] || '';
                 const isRegPrev = USER_DATA.settings.prevYearRegularPayChecks[currentKey] || false;
                 
@@ -783,8 +794,15 @@
                 `;
                 document.getElementById('regular-pay-check').checked = isRegPrev;
                 document.getElementById('regular-pay-check').onclick = () => { saveSplitRegularPayCheckSetting(); playSound('toggle'); };
+                
+                // 전년도 추가 수당 리스트 렌더링
+                renderAdditionalItems(currentKey, 'prev');
+
             } else { // curr
                 document.getElementById('regular-pay-group').style.display = 'flex';
+                document.getElementById('additional-items-wrapper').style.display = 'block';
+                document.getElementById('additional-items-label-suffix').textContent = '(신년도 구간)';
+
                 const currVal = USER_DATA.settings.basePays[currentKey] || '';
                 const isRegCurr = USER_DATA.settings.regularPayChecks[currentKey] || false;
                 
@@ -797,12 +815,18 @@
                 `;
                 document.getElementById('regular-pay-check').checked = isRegCurr;
                 document.getElementById('regular-pay-check').onclick = () => { saveSplitRegularPayCheckSetting(); playSound('toggle'); };
+                
+                // 신년도 추가 수당 리스트 렌더링
+                renderAdditionalItems(currentKey, 'curr');
             }
 
         } else {
             // 평달: 탭 숨김 및 기본 UI
             tabsContainer.style.display = 'none';
             document.getElementById('regular-pay-group').style.display = 'flex';
+            document.getElementById('additional-items-wrapper').style.display = 'block';
+            document.getElementById('additional-items-label-suffix').textContent = '';
+            
             const val = USER_DATA.settings.basePays[currentKey] || '';
             const isReg = USER_DATA.settings.regularPayChecks[currentKey] || false;
             
@@ -815,9 +839,10 @@
             `;
             document.getElementById('regular-pay-check').checked = isReg;
             document.getElementById('regular-pay-check').onclick = () => { saveRegularPayCheckSetting(); playSound('toggle'); };
+            
+            renderAdditionalItems(currentKey, 'curr');
         }
 
-        renderAdditionalItems(currentKey);
         updateSalary();
     };
 
@@ -952,10 +977,83 @@
         }
     };
     
-    const copyPreviousMonthAdditionalItems = () => { const currentKey = getCurrentActivePeriodKey(); if (!currentKey) return; const prevKey = getPreviousPeriodKey(currentKey); if (!prevKey) return; const previousItems = USER_DATA.settings.additionalItemsByPeriod[prevKey]; if (previousItems && previousItems.length > 0) { USER_DATA.settings.additionalItemsByPeriod[currentKey] = JSON.parse(JSON.stringify(previousItems)); saveData(); renderAdditionalItems(currentKey); updateSalary(); } else { alert('지난 달에 저장된 추가 수당 목록이 없습니다.'); } };
+    // [FIXED] 1월 분할에 따른 추가 수당 복사 로직 개선
+    const copyPreviousMonthAdditionalItems = () => { 
+        const currentKey = getCurrentActivePeriodKey(); if (!currentKey) return; 
+        const prevKey = getPreviousPeriodKey(currentKey); if (!prevKey) return; 
+        
+        // 어디서 복사해올지, 어디로 복사할지 결정
+        let sourceItems = [];
+        let targetKey = currentKey;
+        let isPrevTarget = false;
+
+        // 1월 분할 탭 로직 적용
+        if (currentKey.endsWith('-12') && currentJanTab === 'prev') {
+            // 전년도(12월) 데이터 -> 1월의 '전년도 구간'으로 복사
+            sourceItems = USER_DATA.settings.additionalItemsByPeriod[prevKey];
+            isPrevTarget = true;
+        } else if (currentKey.endsWith('-12') && currentJanTab === 'curr') {
+             // 1월의 '전년도 구간' 데이터 -> 1월의 '신년도 구간'으로 복사 (연속성)
+            sourceItems = USER_DATA.settings.prevYearAdditionalItemsByPeriod[currentKey];
+            if (!sourceItems || sourceItems.length === 0) {
+                 // 없다면 작년 12월꺼라도
+                 sourceItems = USER_DATA.settings.additionalItemsByPeriod[prevKey];
+            }
+        } else {
+            // 평달: 이전달 -> 이번달
+             sourceItems = USER_DATA.settings.additionalItemsByPeriod[prevKey];
+        }
+
+        if (sourceItems && sourceItems.length > 0) { 
+            const newItems = JSON.parse(JSON.stringify(sourceItems));
+            if (isPrevTarget) {
+                 USER_DATA.settings.prevYearAdditionalItemsByPeriod[targetKey] = newItems;
+            } else {
+                 USER_DATA.settings.additionalItemsByPeriod[targetKey] = newItems;
+            }
+            saveData(); 
+            // 탭 상태에 맞춰 다시 렌더링
+            renderAdditionalItems(targetKey, isPrevTarget ? 'prev' : 'curr'); 
+            updateSalary(); 
+        } else { 
+            alert('복사할 데이터가 없습니다.'); 
+        } 
+    };
+
     const addAdditionalItem = (n = '', a = '') => { const c = document.getElementById('additional-items-list'); const d = document.createElement('div'); d.innerHTML = `<input type="text" placeholder="수당 이름" value="${n}" oninput="saveAdditionalItems()"><input type="number" inputmode="decimal" placeholder="금액" value="${a}" oninput="saveAdditionalItems()" style="flex: 1;"><button onclick="toggleSign(this.previousElementSibling); playSound('click');" style="background-color: var(--color-disabled); color: var(--color-bg); border: 1px solid var(--color-border); border-radius: 4px; font-weight: bold; width: 40px; height: 34px; margin-left: 5px; cursor: pointer; flex: 0 0 40px; padding: 0;">+/-</button><button onclick="this.parentNode.remove(); saveAdditionalItems(); playSound('delete');" style="background: none; border: none; color: var(--color-error); padding: 5px; font-size: 1.2em; flex: 0 0 30px;">&times;</button>`; c.appendChild(d); };
-    const renderAdditionalItems = key => { const c = document.getElementById('additional-items-list'); c.innerHTML = ''; if (key) (USER_DATA.settings.additionalItemsByPeriod[key] || []).forEach(i => addAdditionalItem(i.name, i.amount)); };
-    const saveAdditionalItems = () => { const key = getCurrentActivePeriodKey(); if (!key) return; const items = []; document.querySelectorAll('#additional-items-list > div').forEach(d => { const inputs = d.querySelectorAll('input'); const n = inputs[0].value; const a = Number(inputs[1].value); if (n) items.push({ name: n, amount: a }); }); USER_DATA.settings.additionalItemsByPeriod[key] = items; saveData(); updateSalary(); };
+    
+    // [FIXED] 렌더링 시 context (prev/curr) 구분
+    const renderAdditionalItems = (key, context = 'curr') => { 
+        const c = document.getElementById('additional-items-list'); c.innerHTML = ''; 
+        let items = [];
+        if (key) {
+            if (context === 'prev') {
+                items = USER_DATA.settings.prevYearAdditionalItemsByPeriod[key] || [];
+            } else {
+                items = USER_DATA.settings.additionalItemsByPeriod[key] || [];
+            }
+        }
+        items.forEach(i => addAdditionalItem(i.name, i.amount)); 
+    };
+
+    // [FIXED] 저장 시 현재 탭 상태 확인하여 구분 저장
+    const saveAdditionalItems = () => { 
+        const key = getCurrentActivePeriodKey(); if (!key) return; 
+        const items = []; 
+        document.querySelectorAll('#additional-items-list > div').forEach(d => { 
+            const inputs = d.querySelectorAll('input'); 
+            const n = inputs[0].value; 
+            const a = Number(inputs[1].value); 
+            if (n) items.push({ name: n, amount: a }); 
+        }); 
+        
+        if (key.endsWith('-12') && currentJanTab === 'prev') {
+            USER_DATA.settings.prevYearAdditionalItemsByPeriod[key] = items;
+        } else {
+            USER_DATA.settings.additionalItemsByPeriod[key] = items; 
+        }
+        saveData(); updateSalary(); 
+    };
     const toggleSign = (inputElement) => { if (!inputElement || inputElement.value === '') return; inputElement.value = Number(inputElement.value) * -1; inputElement.dispatchEvent(new Event('input', { bubbles: true })); };
 
     const populateStatsFilter = () => { const yf = document.getElementById('stats-year-filter'); const years = new Set(); Object.keys(USER_DATA.settings.basePays).forEach(k => years.add(k.substring(0, 4))); Object.keys(USER_DATA.workRecords).forEach(d => years.add(d.substring(0, 4))); years.add(new Date().getFullYear().toString()); const sorted = Array.from(years).sort((a, b) => b - a); yf.innerHTML = '<option value="all">전체 년도</option>'; sorted.forEach(y => yf.innerHTML += `<option value="${y}">${y}년</option>`); yf.value = new Date().getFullYear(); };

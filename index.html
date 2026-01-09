@@ -21,12 +21,14 @@
     :root {
         --color-bg: #121212; --color-surface: #1E1E1E; --color-text: #E0E0E0; --color-text-secondary: #AAAAAA;
         --color-primary: #00BFFF; --color-secondary: #FF6F00; --color-error: #CF6679;
+        --color-success: #00E676; /* 추가된 성공 색상 */
         --color-highlight: rgba(0, 191, 255, 0.15); --color-disabled: #383838; --color-border: #444444;
         --color-night-shift-dark: #2A3B4D; --shadow-elevation: 0 4px 8px rgba(0, 0, 0, 0.5); --mobile-padding: 16px;
     }
     :root.light-mode {
         --color-bg: #F5F5F5; --color-surface: #FFFFFF; --color-text: #212121; --color-text-secondary: #757575;
         --color-primary: #1976D2; --color-secondary: #FFA000; --color-error: #D32F2F;
+        --color-success: #388E3C;
         --color-highlight: rgba(25, 118, 210, 0.1); --color-disabled: #BDBDBD; --color-border: #E0E0E0;
         --color-night-shift-dark: #E3F2FD; --shadow-elevation: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -37,7 +39,7 @@
     :root.light-mode .day-cell.disabled { background-color: #EEEEEE; color: var(--color-disabled); }
     :root.light-mode .day-cell.night-shift-background { background-color: var(--color-night-shift-dark); }
     :root.light-mode .day-cell.night-shift-background.disabled { background-color: #ECEFF1; }
-    :root.light-mode .input-group input, :root.light-mode .input-group select, :root.light-mode .overtime-input-row select, :root.light-mode .overtime-input-row input, :root.light-mode #stats-year-filter, :root.light-mode #stats-month-filter, :root.light-mode #overtime-list-container select { background-color: #FFFFFF; color: var(--color-text); border: 1px solid var(--color-border); }
+    :root.light-mode .input-group input, :root.light-mode .input-group select, :root.light-mode .overtime-input-row select, :root.light-mode .overtime-input-row input, :root.light-mode #stats-year-filter, :root.light-mode #stats-month-filter, :root.light-mode #stats-view-mode, :root.light-mode #overtime-list-container select { background-color: #FFFFFF; color: var(--color-text); border: 1px solid var(--color-border); }
     :root.light-mode .radio-group label { background-color: #EEEEEE; color: var(--color-text-secondary); }
     :root.light-mode .radio-group input[type="radio"]:checked + label { background-color: var(--color-primary); color: #FFFFFF; }
     :root.light-mode .sub-tab-button { background-color: #E0E0E0; color: #757575; }
@@ -117,8 +119,8 @@
     .modal-actions button.danger { background-color: var(--color-error); color: #FFFFFF; }
     .float-button { position: fixed; bottom: 20px; right: 20px; background-color: var(--color-secondary); color: var(--color-bg); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5em; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-elevation); z-index: 150; }
     #statistics-view { padding: var(--mobile-padding); }
-    .stats-filter { display: flex; gap: 10px; margin-bottom: 20px; }
-    .stats-filter select { flex: 1; padding: 8px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg); color: var(--color-text); }
+    .stats-filter { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stats-filter select { flex: 1; padding: 8px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg); color: var(--color-text); min-width: 100px; }
     .table-scroll-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .stats-table { width: 100%; border-collapse: collapse; }
     .stats-table th, .stats-table td { padding: 12px 5px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 0.9em; white-space: nowrap; }
@@ -137,6 +139,26 @@
     .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
     input:checked + .slider { background-color: var(--color-primary); }
     input:checked + .slider:before { transform: translateX(22px); }
+
+    /* === 통계 상세 보기 및 대시보드 스타일 (추가됨) === */
+    .stats-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background-color: var(--color-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--color-border); }
+    .stats-dashboard-item { display: flex; flex-direction: column; }
+    .stats-dashboard-item.full-width { grid-column: 1 / -1; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; margin-bottom: 5px; }
+    .stats-dashboard-label { font-size: 0.85em; color: var(--color-text-secondary); margin-bottom: 2px; }
+    .stats-dashboard-value { font-size: 1.2em; font-weight: bold; }
+    .stats-row-main { cursor: pointer; transition: background-color 0.2s; }
+    .stats-row-main:hover { background-color: var(--color-highlight); }
+    .stats-detail-row { display: none; background-color: var(--color-bg); }
+    .stats-detail-row.show { display: table-row; animation: fadeIn 0.3s; }
+    .detail-content { padding: 15px; border-left: 3px solid var(--color-primary); margin: 5px 0; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9em; margin-bottom: 10px; }
+    .detail-label { color: var(--color-text-secondary); }
+    .detail-value { text-align: right; font-weight: bold; }
+    .amount-plus { color: var(--color-primary); }
+    .amount-minus { color: var(--color-error); }
+    .detail-list-item { display: flex; justify-content: space-between; font-size: 0.85em; padding: 2px 0; }
+    .detail-section-title { font-weight: bold; margin-top: 10px; margin-bottom: 5px; border-bottom: 1px solid var(--color-border); padding-bottom: 3px; font-size: 0.95em; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -223,7 +245,21 @@
         <div id="tab-content-statistics" class="tab-content" style="display:none;">
             <section id="statistics-view">
                 <h3>월별 근무 통계</h3>
-                <div id="stats-total-sum" style="font-size: 1.5em; color: var(--color-secondary); margin-bottom: 15px; text-align: right;">총 합계: 0 원</div>
+                <div class="stats-dashboard">
+                    <div class="stats-dashboard-item full-width">
+                        <span class="stats-dashboard-label">실수령액 (최종)</span>
+                        <span class="stats-dashboard-value" id="stats-dash-net" style="color: var(--color-primary);">0 원</span>
+                    </div>
+                    <div class="stats-dashboard-item">
+                        <span class="stats-dashboard-label">지급 총액 (세전/수당포함)</span>
+                        <span class="stats-dashboard-value" id="stats-dash-gross" style="color: var(--color-text); font-size: 1em;">0 원</span>
+                    </div>
+                    <div class="stats-dashboard-item">
+                        <span class="stats-dashboard-label">공제 총액 (차감)</span>
+                        <span class="stats-dashboard-value" id="stats-dash-deduct" style="color: var(--color-error); font-size: 1em;">0 원</span>
+                    </div>
+                </div>
+
                 <div class="stats-filter">
                     <select id="stats-year-filter" onchange="renderStatistics()"></select>
                     <select id="stats-month-filter" onchange="renderStatistics()">
@@ -231,10 +267,15 @@
                         <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
                         <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
                     </select>
+                    <select id="stats-view-mode" onchange="renderStatistics()">
+                        <option value="salary">실수령액 우선</option>
+                        <option value="work">근무 현황 (야간/특근/휴가)</option>
+                        <option value="deduction">공제 총액 우선</option>
+                    </select>
                 </div>
                 <div class="table-scroll-wrapper">
                     <table class="stats-table">
-                        <thead><tr><th>기간</th><th>총 급여</th><th>야간</th><th>특근</th><th>휴가/반차</th></tr></thead>
+                        <thead><tr><th>기간</th><th>실수령액</th><th style="text-align:center;">상세</th></tr></thead>
                         <tbody id="stats-table-body"></tbody>
                     </table>
                 </div>
@@ -277,11 +318,6 @@
                 <div class="form-row checkbox-group">
                     <label for="sound-toggle">효과음 켜기</label>
                      <label class="toggle-switch"><input type="checkbox" id="sound-toggle" onchange="toggleMute(this.checked)"><span class="slider"></span></label>
-                </div>
-                <hr>
-                <h3>팝업 메시지 관리</h3>
-                <div class="form-row">
-                    <button onclick="openMessageModal(); playSound('open');" style="width: 100%; background-color: var(--color-primary); color: var(--color-bg); padding: 10px 20px; border: none; border-radius: 20px; font-size: 1em; cursor: pointer; font-weight: bold;">앱 시작 메시지 설정</button>
                 </div>
                 <hr>
                 <h3>데이터 백업/복구</h3>
@@ -350,27 +386,26 @@
     </div>
 </div>
 
-<div id="message-modal" class="modal" style="z-index: 400;">
+<div id="admin-notice-modal" class="modal" style="z-index: 400;">
     <div class="modal-content">
-        <h3 id="message-modal-title">앱 메시지 설정</h3>
-        <div class="form-row">
-            <label for="modal-message-content">팝업에 표시할 메시지 내용:</label>
-            <textarea id="modal-message-content" rows="6" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg); color: var(--color-text); font-size: 1em;"></textarea>
-            <small style="color: var(--color-error); display: block; margin-top: 10px;">* 메시지가 저장되면 앱 시작 시 자동으로 팝업으로 표시됩니다. (줄바꿈 가능)</small>
-        </div>
+        <h3 style="color: var(--color-primary);">📢 공지사항</h3>
+        <p id="admin-notice-text" style="line-height: 1.6; white-space: pre-wrap; margin-bottom: 20px;"></p>
         <div class="modal-actions">
-            <button onclick="closeModal('message-modal'); playSound('click');" class="secondary">닫기</button>
-            <button onclick="clearMessage(); playSound('delete');" class="danger">메시지 지우기</button>
-            <button onclick="saveMessage(); playSound('save');" class="primary">저장 및 닫기</button>
+            <button onclick="closeAdminNotice(true); playSound('click');" class="secondary" style="font-size: 0.9em;">일주일간 보지 않기</button>
+            <button onclick="closeAdminNotice(false); playSound('click');" class="primary">닫기</button>
         </div>
     </div>
 </div>
 
 <script>
+    /* === [관리자 설정 구역] === */
+    // 아래 따옴표 안에 내용을 작성하면 앱 시작 시 공지 팝업이 뜹니다.
+    // 내용을 비워두면("") 팝업이 뜨지 않습니다.
+    const ADMIN_NOTICE_CONTENT = "통계부분 수정됨.\n앱 사용시 장애신고/문의: 010-4104-2226"; 
+    
     /* === (시작) 메인 앱 스크립트 === */
-    const CURRENT_APP_VERSION = "2.2.1"; // 버그 수정 및 안드로이드 안정화 버전
+    const CURRENT_APP_VERSION = "2.3.3"; // 연도 표시 범위 로직 수정 (2025~계속)
     const DEFAULT_OVERTIME_MAP = { '주간': 3.0, '야간': 4.5, '야간퇴근(칠서)': 2.5, '주간특근': 0.5, '야간특근': 7.0, '17시퇴근': 0.5 };
-    const MESSAGE_STORAGE_KEY = 'smartSalaryApp_startup_message'; 
     
     // 월별 통상임금 가산액 (상여 200만원 / 12개월)
     const REGULAR_BONUS_MONTHLY = 2000000 / 12;
@@ -464,15 +499,20 @@
     const isHoliday = date => USER_DATA.settings.customHolidays.some(h => h.date === formatDate(date));
 
     // --- Salary Calculation Logic (분할 통계 + 역산 + 반별 시수 적용) ---
-    // [FIXED] 데이터 누락시 0원/NaN 방지 처리 추가
+    // [수정됨] 수당과 공제를 분리하여 계산하는 로직 적용
     const calculatePeriodStats = (periodKey) => {
         const stats = { 
             totalSalary: 0, 
             basePay: 0, 
-            finalHourlyWage: 0,
-            nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0,
+            totalOvertimePay: 0, // 잔업/특근/야간 수당 합계
+            totalAllowances: 0,  // 추가 수당 합계 (+)
+            totalDeductions: 0,  // 공제 합계 (-)
             
-            // 내부 계산용: 분리된 통계
+            finalHourlyWage: 0,
+            nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, 
+            nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0,
+            
+            // 내부 계산용
             prevPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0, additionalAmount: 0 },
             currPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0, additionalAmount: 0 }
         };
@@ -480,47 +520,38 @@
         const period = getSalaryPeriodByPeriodKey(periodKey);
         if (!period) return stats;
 
-        const isJanuary = periodKey.endsWith('-12'); // 1월 급여 기간 (12.20~01.19)
+        const isJanuary = periodKey.endsWith('-12');
         
-        // --- 1. 기본급 및 시급 계산 (핵심 수정: Number() 변환 및 Default 값 0 처리) ---
-        // 데이터가 없으면 undefined가 되어 NaN 에러가 발생하는 것을 방지
         let basePayCurr = Number(USER_DATA.settings.basePays[periodKey]) || 0; 
         let basePayPrev = isJanuary ? (Number(USER_DATA.settings.prevYearBasePays[periodKey]) || 0) : basePayCurr;
 
         const isRegularPayCheckedCurr = USER_DATA.settings.regularPayChecks[periodKey] || false;
         const isRegularPayCheckedPrev = isJanuary ? (USER_DATA.settings.prevYearRegularPayChecks[periodKey] || false) : isRegularPayCheckedCurr;
         
-        // 반 정보 및 기준 시수 (D반은 209, 그 외 226)
         const currentClass = getClassForDate(period.startDate);
         const standardMonthlyHours = (currentClass === 'D') ? 209 : 226; 
 
         if (isJanuary) {
-            // [전년도 12일분]
             let fullMonthBasePrev = basePayPrev * (31 / 12);
             if (isRegularPayCheckedPrev) fullMonthBasePrev += REGULAR_BONUS_MONTHLY;
             stats.prevPart.hourlyWage = fullMonthBasePrev > 0 ? fullMonthBasePrev / standardMonthlyHours : 0;
 
-            // [신년도 19일분]
             let fullMonthBaseCurr = basePayCurr * (31 / 19);
             if (isRegularPayCheckedCurr) fullMonthBaseCurr += REGULAR_BONUS_MONTHLY;
             stats.currPart.hourlyWage = fullMonthBaseCurr > 0 ? fullMonthBaseCurr / standardMonthlyHours : 0;
 
             stats.basePay = basePayPrev + basePayCurr;
         } else {
-            // [평달]
             let fullMonthBase = basePayCurr;
             if (isRegularPayCheckedCurr) fullMonthBase += REGULAR_BONUS_MONTHLY;
             stats.currPart.hourlyWage = fullMonthBase > 0 ? fullMonthBase / standardMonthlyHours : 0;
             stats.basePay = basePayCurr;
         }
 
-        // --- 2. 날짜별 루프 및 통계 누적 ---
         let tempDate = new Date(period.startDate);
         while (tempDate <= period.endDate) {
             const dateStr = formatDate(tempDate);
             const workRecord = USER_DATA.workRecords[dateStr];
-            
-            // 전년도(12월 20일 ~ 12월 31일)인지 판별
             const isPrevYearDate = isJanuary && (tempDate.getMonth() === 11);
             const targetPart = isPrevYearDate ? stats.prevPart : stats.currPart;
             const appliedHourlyWage = targetPart.hourlyWage;
@@ -537,7 +568,6 @@
 
                 if (appliedHourlyWage > 0) {
                     const isSpecialDay = workRecord.type.includes('특근') || tempDate.getDay() === 0;
-                    
                     if (totalOvertime > 0) {
                         if (isSpecialDay) {
                             targetPart.specialOT += totalOvertime;
@@ -554,19 +584,30 @@
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // --- 3. 추가 수당 합산 (분리 적용) ---
+        // --- 추가 수당 및 공제 분리 합산 ---
+        const processAdditionalItems = (items) => {
+            items.forEach(item => {
+                if (item.amount >= 0) stats.totalAllowances += item.amount;
+                else stats.totalDeductions += item.amount; // 음수 값 그대로 더함
+            });
+            return items.reduce((sum, item) => sum + item.amount, 0);
+        };
+
         const additionalItemsCurr = USER_DATA.settings.additionalItemsByPeriod[periodKey] || [];
         const additionalItemsPrev = isJanuary ? (USER_DATA.settings.prevYearAdditionalItemsByPeriod[periodKey] || []) : [];
         
-        stats.currPart.additionalAmount = additionalItemsCurr.reduce((sum, item) => sum + item.amount, 0);
-        stats.prevPart.additionalAmount = additionalItemsPrev.reduce((sum, item) => sum + item.amount, 0);
+        stats.currPart.additionalAmount = processAdditionalItems(additionalItemsCurr);
+        if (isJanuary) stats.prevPart.additionalAmount = processAdditionalItems(additionalItemsPrev);
 
-        stats.totalSalary = stats.basePay 
-                            + stats.prevPart.weekdayOTAmount + stats.currPart.weekdayOTAmount
+        // 전체 수당 합계 계산 (기본급 제외한 모든 수당)
+        stats.totalOvertimePay = stats.prevPart.weekdayOTAmount + stats.currPart.weekdayOTAmount
                             + stats.prevPart.specialOTAmount + stats.currPart.specialOTAmount
                             + stats.prevPart.specialAmount + stats.currPart.specialAmount
-                            + stats.prevPart.nightAmount + stats.currPart.nightAmount
-                            + stats.prevPart.additionalAmount + stats.currPart.additionalAmount;
+                            + stats.prevPart.nightAmount + stats.currPart.nightAmount;
+
+        stats.totalSalary = stats.basePay 
+                            + stats.totalOvertimePay
+                            + stats.prevPart.additionalAmount + stats.currPart.additionalAmount; // 여기엔 공제(음수)도 포함됨
                             
         if (isJanuary) {
             stats.nightDays = stats.prevPart.nightDays + stats.currPart.nightDays;
@@ -654,12 +695,29 @@
     };
 
     // --- UI Rendering ---
+    // [수정됨] 달력 생성 범위 로직 변경 (2025년부터 시작 + 과거 데이터 자동 포함 + 미래 자동 확장)
     const generateCalendar = (scrollToToday = false) => {
         const calendarView = document.getElementById('calendar-view');
         calendarView.innerHTML = '';
         const today = new Date();
+        const currentYear = today.getFullYear();
+
+        // 1. 시작 연도 계산 (기본 2025년, 단 데이터가 더 과거에 있으면 그 연도부터)
+        let startYear = 2025;
+        const recordYears = Object.keys(USER_DATA.workRecords).map(d => parseInt(d.split('-')[0]));
+        const payYears = Object.keys(USER_DATA.settings.basePays).map(k => parseInt(k.split('-')[0]));
+        const allYears = [...recordYears, ...payYears];
+        if (allYears.length > 0) {
+            const minDataYear = Math.min(...allYears);
+            if (minDataYear < startYear) startYear = minDataYear;
+        }
+
+        // 2. 종료 연도 계산 (현재 연도 + 1년) -> 시간이 지나면 자동으로 늘어남
+        const endYear = currentYear + 1;
+
         let lastScrollMonthId = '';
-        for (let y = today.getFullYear() - 1; y <= today.getFullYear() + 1; y++) {
+
+        for (let y = startYear; y <= endYear; y++) {
             for (let m = 0; m < 12; m++) {
                 const monthId = `month-${y}-${m}`;
                 const monthElement = document.createElement('div');
@@ -691,6 +749,7 @@
 
         if (scrollToToday && lastScrollMonthId) { scrollToTodayMonth(lastScrollMonthId, true); } else { updateActiveMonth(); }
     };
+
     const updateDayCell = (dateStr, cell) => {
         const dayCell = cell || document.querySelector(`.day-cell[data-date="${dateStr}"]`);
         if (!dayCell) return;
@@ -910,39 +969,28 @@
         modal.style.display = 'flex';
     };
     
-    // 앱 시작 메시지 관련 함수
-    const openMessageModal = () => {
-        const message = localStorage.getItem(MESSAGE_STORAGE_KEY) || '';
-        document.getElementById('modal-message-content').value = message;
-        document.getElementById('message-modal').style.display = 'flex';
-    };
+    // [수정됨] 관리자 공지 팝업 로직
+    const checkAdminNotice = () => {
+        if (!ADMIN_NOTICE_CONTENT) return; // 내용이 없으면 중단
 
-    const saveMessage = () => {
-        const message = document.getElementById('modal-message-content').value.trim();
-        if (message) {
-            localStorage.setItem(MESSAGE_STORAGE_KEY, message);
-            alert('메시지가 성공적으로 저장되었습니다. 앱 재시작 시 팝업으로 표시됩니다.');
-        } else {
-            localStorage.removeItem(MESSAGE_STORAGE_KEY);
-            alert('메시지 내용이 비어있어 팝업 기능이 비활성화되었습니다.');
+        const hideUntil = localStorage.getItem('smartSalaryApp_admin_notice_hide_until');
+        if (hideUntil && new Date().getTime() < Number(hideUntil)) {
+            return; // 숨김 기간이 아직 안 지났으면 중단
         }
-        closeModal('message-modal');
+
+        document.getElementById('admin-notice-text').textContent = ADMIN_NOTICE_CONTENT;
+        document.getElementById('admin-notice-modal').style.display = 'flex';
     };
 
-    const clearMessage = () => {
-        localStorage.removeItem(MESSAGE_STORAGE_KEY);
-        document.getElementById('modal-message-content').value = '';
-        alert('팝업 메시지가 삭제되었습니다.');
-        closeModal('message-modal');
+    const closeAdminNotice = (hideForWeek) => {
+        if (hideForWeek) {
+            // 7일 후의 타임스탬프 계산
+            const nextWeek = new Date().getTime() + (7 * 24 * 60 * 60 * 1000);
+            localStorage.setItem('smartSalaryApp_admin_notice_hide_until', nextWeek);
+        }
+        closeModal('admin-notice-modal');
     };
     
-    const checkStartupMessage = () => {
-        const message = localStorage.getItem(MESSAGE_STORAGE_KEY);
-        if (message) {
-            // onlyOk = true로 설정하여 '확인' 버튼만 표시
-            showConfirm('앱 시작 알림', message, () => {}, true);
-        }
-    };
     // ------------------------------------
 
     const resetAllData = () => showConfirm('데이터 초기화', '경고: 모든 저장된 데이터를 영구적으로 삭제하고 초기화하시겠습니까?', () => { localStorage.removeItem('smartSalaryApp_user_data'); window.location.reload(); }); 
@@ -1046,36 +1094,144 @@
 
     const populateStatsFilter = () => { const yf = document.getElementById('stats-year-filter'); const years = new Set(); Object.keys(USER_DATA.settings.basePays).forEach(k => years.add(k.substring(0, 4))); Object.keys(USER_DATA.workRecords).forEach(d => years.add(d.substring(0, 4))); years.add(new Date().getFullYear().toString()); const sorted = Array.from(years).sort((a, b) => b - a); yf.innerHTML = '<option value="all">전체 년도</option>'; sorted.forEach(y => yf.innerHTML += `<option value="${y}">${y}년</option>`); yf.value = new Date().getFullYear(); };
     
-    // [FIXED] 통계 렌더링 함수 수정: 월 밀림 현상 해결 (1월 급여 = 작년 12월 구간 데이터 매칭)
+    // [수정됨] 통계 보기 모드 및 상단 대시보드 합계 계산 적용
     const renderStatistics = () => { 
         const yVal = document.getElementById('stats-year-filter').value;
         const mVal = Number(document.getElementById('stats-month-filter').value);
+        const viewMode = document.getElementById('stats-view-mode').value; // 보기 모드 값 가져오기
         const tb = document.getElementById('stats-table-body'); 
         tb.innerHTML = ''; 
         let years = yVal === 'all' ? Array.from(document.getElementById('stats-year-filter').options).map(o => o.value).filter(v => v !== 'all') : [yVal]; 
-        let total = 0; 
         
+        // 전체 합계 변수 초기화
+        let totalNet = 0; // 실수령액 (최종)
+        let totalGross = 0; // 지급 총액 (세전)
+        let totalDeduct = 0; // 공제 총액 (마이너스)
+        
+        // 테이블 헤더 변경
+        const thead = document.querySelector('.stats-table thead tr');
+        let headerLabel = '실수령액';
+        if (viewMode === 'work') headerLabel = '근무 현황';
+        else if (viewMode === 'deduction') headerLabel = '공제 총액';
+
+        if(thead) thead.innerHTML = `<th>기간</th><th>${headerLabel}</th><th style="text-align:center;">상세</th>`;
+
         years.forEach(y => { 
-            // 1월부터 12월까지 순회
             for (let displayMonth = (mVal || 1); displayMonth <= (mVal || 12); displayMonth++) { 
                 let targetYear = Number(y);
-                let targetKeyMonth = displayMonth - 1; // 1월이면 0(이전년도 12월)이 되어야 함
-                
-                if (targetKeyMonth === 0) {
-                    targetKeyMonth = 12;
-                    targetYear = targetYear - 1;
-                }
+                let targetKeyMonth = displayMonth - 1; 
+                if (targetKeyMonth === 0) { targetKeyMonth = 12; targetYear = targetYear - 1; }
                 
                 const key = `${targetYear}-${String(targetKeyMonth).padStart(2, '0')}`;
                 const s = calculatePeriodStats(key); 
 
-                if (s.totalSalary > 0) { 
-                    tb.innerHTML += `<tr><td>${y}년 ${displayMonth}월</td><td>${Math.round(s.totalSalary).toLocaleString()} 원</td><td>${s.nightDays}일</td><td>${s.specialDays}일</td><td>${s.vacationDays}일</td></tr>`; 
-                    total += s.totalSalary; 
+                // 데이터가 존재하는 달만 표시
+                if (s.totalSalary !== 0 || s.basePay !== 0) { 
+                    // 합계 누적 (s.totalDeductions는 음수 값이므로 절댓값으로 처리하지 않고 그대로 더하면 줄어드니 주의)
+                    // 여기서는 '공제 총액'을 양수 개념으로 보여줄지 음수로 보여줄지에 따라 다름.
+                    // 통상적으로 공제액은 "얼마 뗐다" 표현하므로 마이너스 부호와 함께 합산.
+                    
+                    totalNet += s.totalSalary;
+                    
+                    // 지급 총액 = 기본급 + 잔업수당 + (양수 추가수당)
+                    const monthGross = s.basePay + s.totalOvertimePay + s.totalAllowances;
+                    totalGross += monthGross;
+                    
+                    totalDeduct += s.totalDeductions; // s.totalDeductions는 이미 음수값임
+                    
+                    const rowId = `stats-row-${key}`;
+                    
+                    // 상세 내역 구하기
+                    let items = [...(USER_DATA.settings.additionalItemsByPeriod[key] || [])];
+                    if (key.endsWith('-12')) {
+                        items = [...items, ...(USER_DATA.settings.prevYearAdditionalItemsByPeriod[key] || [])];
+                    }
+                    
+                    let allowanceListHtml = '';
+                    let deductionListHtml = '';
+
+                    items.forEach(item => {
+                        const amountStr = Math.round(item.amount).toLocaleString();
+                        if(item.amount >= 0) {
+                            allowanceListHtml += `<div class="detail-list-item"><span>${item.name}</span><span class="amount-plus">+${amountStr}</span></div>`;
+                        } else {
+                            deductionListHtml += `<div class="detail-list-item"><span>${item.name}</span><span class="amount-minus">${amountStr}</span></div>`;
+                        }
+                    });
+
+                    if(!allowanceListHtml) allowanceListHtml = '<div class="detail-list-item" style="color:#aaa;">없음</div>';
+                    if(!deductionListHtml) deductionListHtml = '<div class="detail-list-item" style="color:#aaa;">없음</div>';
+
+                    // [수정됨] 보기 모드에 따라 표시할 값 결정
+                    let displayValue = '';
+                    if (viewMode === 'salary') {
+                        displayValue = `${Math.round(s.totalSalary).toLocaleString()} 원`;
+                    } else if (viewMode === 'work') {
+                        // 모바일 화면 공간 고려하여 간략 표시
+                        displayValue = `<span style="font-size:0.85em; color:var(--color-text);">야간:${s.nightDays} 특근:${s.specialDays} 휴가:${s.vacationDays}</span>`;
+                    } else if (viewMode === 'deduction') {
+                        displayValue = `<span style="color:var(--color-error); font-weight:bold;">${Math.round(s.totalDeductions).toLocaleString()} 원</span>`;
+                    }
+
+                    // 메인 행
+                    tb.innerHTML += `
+                        <tr class="stats-row-main" onclick="toggleStatsDetail('${rowId}'); playSound('click');">
+                            <td>${y}년 ${displayMonth}월</td>
+                            <td style="font-weight:bold; color:var(--color-primary);">${displayValue}</td>
+                            <td style="text-align:center; font-size:0.8em;">▼</td>
+                        </tr>
+                        <tr id="${rowId}" class="stats-detail-row">
+                            <td colspan="3">
+                                <div class="detail-content">
+                                    <div class="detail-grid">
+                                        <span class="detail-label">기본급</span>
+                                        <span class="detail-value">${Math.round(s.basePay).toLocaleString()}</span>
+                                        
+                                        <span class="detail-label">초과근무수당</span>
+                                        <span class="detail-value">${Math.round(s.totalOvertimePay).toLocaleString()}</span>
+                                        
+                                        <span class="detail-label">추가 수당계</span>
+                                        <span class="detail-value amount-plus">+${Math.round(s.totalAllowances).toLocaleString()}</span>
+                                        
+                                        <span class="detail-label">공제 합계</span>
+                                        <span class="detail-value amount-minus">${Math.round(s.totalDeductions).toLocaleString()}</span>
+                                    </div>
+                                    <div style="margin-top:5px; font-size:0.85em; color:var(--color-text-secondary); text-align:right;">
+                                        (야간:${s.nightDays}일 / 특근:${s.specialDays}일 / 휴가:${s.vacationDays}일)
+                                    </div>
+
+                                    <div class="detail-section-title">수당 상세</div>
+                                    ${allowanceListHtml}
+
+                                    <div class="detail-section-title">공제 상세</div>
+                                    ${deductionListHtml}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
                 } 
             } 
         }); 
-        document.getElementById('stats-total-sum').textContent = `총 합계: ${Math.round(total).toLocaleString()} 원`; 
+        
+        // 상단 대시보드 업데이트
+        document.getElementById('stats-dash-net').textContent = `${Math.round(totalNet).toLocaleString()} 원`;
+        document.getElementById('stats-dash-gross').textContent = `${Math.round(totalGross).toLocaleString()} 원`;
+        document.getElementById('stats-dash-deduct').textContent = `${Math.round(totalDeduct).toLocaleString()} 원`;
+    };
+
+    // [추가됨] 상세 행 토글 함수
+    const toggleStatsDetail = (rowId) => {
+        const row = document.getElementById(rowId);
+        const allRows = document.querySelectorAll('.stats-detail-row');
+        
+        // 다른 열려있는 행들은 닫기 (선택사항)
+        allRows.forEach(r => {
+            if(r.id !== rowId) r.classList.remove('show');
+        });
+
+        if (row) {
+            row.classList.toggle('show');
+        }
     };
 
     const renderCustomHolidays = () => { document.getElementById('custom-holidays-list').innerHTML = ''; USER_DATA.settings.customHolidays.filter(h => !DEFAULT_HOLIDAYS_BASE.some(d => d.date === h.date)).forEach(h => addCustomHolidayInput(h.date, h.name)); };
@@ -1173,7 +1329,7 @@
         document.getElementById('today-button').addEventListener('click', () => { scrollToTodayMonth(); playSound('click'); });
         document.getElementById('work-type-group').addEventListener('change', () => document.getElementById('modal-overtime-list').innerHTML = ''); 
         loadData();
-        checkStartupMessage(); // 앱 시작 시 팝업 메시지 확인
+        checkAdminNotice(); // 앱 시작 시 관리자 공지 확인
     });
 </script>
 </body>

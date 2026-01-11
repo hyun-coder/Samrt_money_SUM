@@ -401,7 +401,7 @@
     /* === [관리자 설정 구역] === */
     // 아래 따옴표 안에 내용을 작성하면 앱 시작 시 공지 팝업이 뜹니다.
     // 내용을 비워두면("") 팝업이 뜨지 않습니다.
-    const ADMIN_NOTICE_CONTENT = "■통계부분 수정됨.\n■갤럭시 폴드폰은 불편하시겠지만 백업후 1년 단위로 사용 바랍니다.\n■앱 사용시 장애신고/문의: 010-4104-2226"; 
+    const ADMIN_NOTICE_CONTENT = "■통계부분 수정됨.\n■갤럭시 폴드 대응 코드 수정\n■앱 사용시 장애신고/문의: 010-4104-2226"; 
     
     /* === (시작) 메인 앱 스크립트 === */
     const CURRENT_APP_VERSION = "2.3.3"; // 연도 표시 범위 로직 수정 (2025~계속)
@@ -420,6 +420,16 @@
         { date: '2025-10-03', name: '개천절' }, { date: '2025-10-06', name: '추석' }, { date: '2025-10-07', name: '추석' }, { date: '2025-10-08', name: '추석' }, { date: '2025-10-09', name: '한글날' }, 
         { date: '2025-12-25', name: '성탄절' }, { date: '2026-01-01', name: '신정' }, { date: '2026-02-16', name: '설날' }, { date: '2026-02-17', name: '설날' }, { date: '2026-02-18', name: '설날' }, { date: '2026-05-05', name: '어린이날' }, { date: '2026-05-24', name: '부처님오신날' }, { date: '2026-05-25', name: '대체공휴일' }, { date: '2026-06-03', name: '전국동시지방선거' }, { date: '2026-06-06', name: '현충일' }, { date: '2026-08-15', name: '광복절' }, { date: '2026-08-17', name: '대체공휴일' }, { date: '2026-09-24', name: '추석' }, { date: '2026-09-25', name: '추석' }, { date: '2026-09-26', name: '추석' }, { date: '2026-10-03', name: '개천절' }, { date: '2026-10-05', name: '대체공휴일' }, { date: '2026-10-09', name: '한글날' }, { date: '2026-12-25', name: '성탄절' } 
     ];
+    
+    // [강력한 숫자 변환 방어 코드] 
+    // 갤럭시 폴드 등 키보드 입력 시 보이지 않는 특수문자(Zero Width Space 등)로 인한 NaN 오류 방지
+    const toSafeNumber = (val) => {
+        if (val === undefined || val === null) return 0;
+        // 문자열로 변환 후 숫자, 소수점(.), 음수기호(-)를 제외한 모든 문자(보이지 않는 특수문자 포함) 제거
+        const cleanStr = String(val).replace(/[^0-9.\-]/g, '');
+        const num = Number(cleanStr);
+        return isNaN(num) ? 0 : num;
+    };
 
     // 현재 선택된 1월 분할 탭 ('prev', 'curr', 'total')
     let currentJanTab = 'prev';
@@ -499,20 +509,19 @@
     const isHoliday = date => USER_DATA.settings.customHolidays.some(h => h.date === formatDate(date));
 
     // --- Salary Calculation Logic (분할 통계 + 역산 + 반별 시수 적용) ---
-    // [수정됨] 수당과 공제를 분리하여 계산하는 로직 적용
+    // [수정됨] 안전한 숫자 변환(toSafeNumber) 적용으로 NaN 오류 완전 차단
     const calculatePeriodStats = (periodKey) => {
         const stats = { 
             totalSalary: 0, 
             basePay: 0, 
-            totalOvertimePay: 0, // 잔업/특근/야간 수당 합계
-            totalAllowances: 0,  // 추가 수당 합계 (+)
-            totalDeductions: 0,  // 공제 합계 (-)
+            totalOvertimePay: 0, 
+            totalAllowances: 0, 
+            totalDeductions: 0, 
             
             finalHourlyWage: 0,
             nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, 
             nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0,
             
-            // 내부 계산용
             prevPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0, additionalAmount: 0 },
             currPart: { nightDays: 0, specialDays: 0, vacationDays: 0, weekdayOT: 0, specialOT: 0, nightAmount: 0, specialAmount: 0, weekdayOTAmount: 0, specialOTAmount: 0, hourlyWage: 0, additionalAmount: 0 }
         };
@@ -522,8 +531,9 @@
 
         const isJanuary = periodKey.endsWith('-12');
         
-        let basePayCurr = Number(USER_DATA.settings.basePays[periodKey]) || 0; 
-        let basePayPrev = isJanuary ? (Number(USER_DATA.settings.prevYearBasePays[periodKey]) || 0) : basePayCurr;
+        // 데이터 불러올 때 toSafeNumber로 방어
+        let basePayCurr = toSafeNumber(USER_DATA.settings.basePays[periodKey]); 
+        let basePayPrev = isJanuary ? toSafeNumber(USER_DATA.settings.prevYearBasePays[periodKey]) : basePayCurr;
 
         const isRegularPayCheckedCurr = USER_DATA.settings.regularPayChecks[periodKey] || false;
         const isRegularPayCheckedPrev = isJanuary ? (USER_DATA.settings.prevYearRegularPayChecks[periodKey] || false) : isRegularPayCheckedCurr;
@@ -563,8 +573,9 @@
                 else if (workRecord.type === '반차') targetPart.vacationDays += 0.5;
 
                 let totalOvertime = 0;
-                totalOvertime += DEFAULT_OVERTIME_MAP[workRecord.type] || 0; 
-                if (workRecord.overtimes) totalOvertime += workRecord.overtimes.reduce((sum, item) => sum + (Number(item.time) || 0), 0);
+                // 잔업 시간 계산 시 toSafeNumber 사용
+                totalOvertime += toSafeNumber(DEFAULT_OVERTIME_MAP[workRecord.type]); 
+                if (workRecord.overtimes) totalOvertime += workRecord.overtimes.reduce((sum, item) => sum + toSafeNumber(item.time), 0);
 
                 if (appliedHourlyWage > 0) {
                     const isSpecialDay = workRecord.type.includes('특근') || tempDate.getDay() === 0;
@@ -584,13 +595,13 @@
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // --- 추가 수당 및 공제 분리 합산 ---
         const processAdditionalItems = (items) => {
             items.forEach(item => {
-                if (item.amount >= 0) stats.totalAllowances += item.amount;
-                else stats.totalDeductions += item.amount; // 음수 값 그대로 더함
+                const safeAmount = toSafeNumber(item.amount);
+                if (safeAmount >= 0) stats.totalAllowances += safeAmount;
+                else stats.totalDeductions += safeAmount; 
             });
-            return items.reduce((sum, item) => sum + item.amount, 0);
+            return items.reduce((sum, item) => sum + toSafeNumber(item.amount), 0);
         };
 
         const additionalItemsCurr = USER_DATA.settings.additionalItemsByPeriod[periodKey] || [];
@@ -599,7 +610,6 @@
         stats.currPart.additionalAmount = processAdditionalItems(additionalItemsCurr);
         if (isJanuary) stats.prevPart.additionalAmount = processAdditionalItems(additionalItemsPrev);
 
-        // 전체 수당 합계 계산 (기본급 제외한 모든 수당)
         stats.totalOvertimePay = stats.prevPart.weekdayOTAmount + stats.currPart.weekdayOTAmount
                             + stats.prevPart.specialOTAmount + stats.currPart.specialOTAmount
                             + stats.prevPart.specialAmount + stats.currPart.specialAmount
@@ -607,7 +617,7 @@
 
         stats.totalSalary = stats.basePay 
                             + stats.totalOvertimePay
-                            + stats.prevPart.additionalAmount + stats.currPart.additionalAmount; // 여기엔 공제(음수)도 포함됨
+                            + stats.prevPart.additionalAmount + stats.currPart.additionalAmount;
                             
         if (isJanuary) {
             stats.nightDays = stats.prevPart.nightDays + stats.currPart.nightDays;
@@ -626,10 +636,8 @@
         if (!currentKey) return;
         const stats = calculatePeriodStats(currentKey);
         
-        // 전체 총 급여 (상단 큰 글씨)
         document.getElementById('total-expected-salary').textContent = Math.round(stats.totalSalary).toLocaleString() + ' 원';
         
-        // 1월인 경우 탭 상태에 따라 표시할 통계 및 시급 결정
         const isJanuary = currentKey.endsWith('-12');
         let displayStats = stats;
         let displayHourlyWageText = Math.round(stats.finalHourlyWage).toLocaleString() + '원';
@@ -647,7 +655,6 @@
                 displayHourlyWageText = wageCurr.toLocaleString() + '원';
                 document.getElementById('stats-period-indicator').textContent = '01.01 ~ 01.19 통계';
             } else if (currentJanTab === 'total') {
-                // 통합 탭 로직 추가: 두 부분의 통계를 합산
                 displayStats = {
                     weekdayOT: stats.prevPart.weekdayOT + stats.currPart.weekdayOT,
                     weekdayOTAmount: stats.prevPart.weekdayOTAmount + stats.currPart.weekdayOTAmount,
@@ -668,7 +675,6 @@
         
         document.getElementById('current-salary-options').textContent = `적용시급: ${displayHourlyWageText}`;
 
-        // 통계 박스 업데이트
         ['weekday-ot-time', 'special-ot-time', 'special-day-count', 'night-day-count'].forEach(key => {
             let count = 0, amount = 0;
             if(key.includes('-ot-time')) { 
@@ -687,22 +693,18 @@
         });
     };
 
-    // --- 1월 탭 전환 로직 ---
     const switchJanTab = (tab) => {
         currentJanTab = tab;
-        loadPeriodSettingsToUI(); // UI 다시 그리기
+        loadPeriodSettingsToUI();
         playSound('click');
     };
 
-    // --- UI Rendering ---
-    // [수정됨] 달력 생성 범위 로직 변경 (2025년부터 시작 + 과거 데이터 자동 포함 + 미래 자동 확장)
     const generateCalendar = (scrollToToday = false) => {
         const calendarView = document.getElementById('calendar-view');
         calendarView.innerHTML = '';
         const today = new Date();
         const currentYear = today.getFullYear();
 
-        // 1. 시작 연도 계산 (기본 2025년, 단 데이터가 더 과거에 있으면 그 연도부터)
         let startYear = 2025;
         const recordYears = Object.keys(USER_DATA.workRecords).map(d => parseInt(d.split('-')[0]));
         const payYears = Object.keys(USER_DATA.settings.basePays).map(k => parseInt(k.split('-')[0]));
@@ -712,7 +714,6 @@
             if (minDataYear < startYear) startYear = minDataYear;
         }
 
-        // 2. 종료 연도 계산 (현재 연도 + 1년) -> 시간이 지나면 자동으로 늘어남
         const endYear = currentYear + 1;
 
         let lastScrollMonthId = '';
@@ -783,7 +784,6 @@
         }, 100);
     };
 
-    // --- Dynamic UI Input Loading (1월 분할 탭 적용) ---
     const loadPeriodSettingsToUI = () => {
         const currentKey = getCurrentActivePeriodKey();
         if (!currentKey) return;
@@ -795,7 +795,6 @@
         
         const isJanuary = currentKey.endsWith('-12');
         
-        // 1월인 경우 탭 UI 활성화 (3번째 탭 '통합(전체)' 추가)
         if (isJanuary) {
             tabsContainer.style.display = 'flex';
             tabsContainer.className = 'sub-tab-container';
@@ -805,11 +804,9 @@
                 <button class="sub-tab-button ${currentJanTab === 'total' ? 'active' : ''}" onclick="switchJanTab('total')">전체 (통합)</button>
             `;
             
-            // 현재 탭에 따른 입력값 로드
             if (currentJanTab === 'total') {
-                // 통합 탭: 읽기 전용 요약 뷰
-                const prevVal = Number(USER_DATA.settings.prevYearBasePays[currentKey]) || 0;
-                const currVal = Number(USER_DATA.settings.basePays[currentKey]) || 0;
+                const prevVal = toSafeNumber(USER_DATA.settings.prevYearBasePays[currentKey]);
+                const currVal = toSafeNumber(USER_DATA.settings.basePays[currentKey]);
                 const totalVal = prevVal + currVal;
                 
                 document.getElementById('base-pay-label').textContent = '기본급 합계 (전년+신년)';
@@ -820,7 +817,6 @@
                         <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--color-primary);"><span>합계:</span> <span>${totalVal.toLocaleString()}원</span></div>
                     </div>
                 `;
-                // 통상임금 체크박스 & 추가수당 리스트 숨기기
                 document.getElementById('regular-pay-group').style.display = 'none';
                 document.getElementById('additional-items-wrapper').style.display = 'none';
 
@@ -842,7 +838,6 @@
                 document.getElementById('regular-pay-check').checked = isRegPrev;
                 document.getElementById('regular-pay-check').onclick = () => { saveSplitRegularPayCheckSetting(); playSound('toggle'); };
                 
-                // 전년도 추가 수당 리스트 렌더링
                 renderAdditionalItems(currentKey, 'prev');
 
             } else { // curr
@@ -863,12 +858,10 @@
                 document.getElementById('regular-pay-check').checked = isRegCurr;
                 document.getElementById('regular-pay-check').onclick = () => { saveSplitRegularPayCheckSetting(); playSound('toggle'); };
                 
-                // 신년도 추가 수당 리스트 렌더링
                 renderAdditionalItems(currentKey, 'curr');
             }
 
         } else {
-            // 평달: 탭 숨김 및 기본 UI
             tabsContainer.style.display = 'none';
             document.getElementById('regular-pay-group').style.display = 'flex';
             document.getElementById('additional-items-wrapper').style.display = 'block';
@@ -893,19 +886,18 @@
         updateSalary();
     };
 
-    // 평달 저장
-    const saveBasePaySetting = () => { const key = getCurrentActivePeriodKey(); if (key) { USER_DATA.settings.basePays[key] = Number(document.getElementById('base-pay').value) || 0; saveData(); updateSalary(); } };
+    // 저장 시에도 toSafeNumber 사용으로 데이터 오염 방지
+    const saveBasePaySetting = () => { const key = getCurrentActivePeriodKey(); if (key) { USER_DATA.settings.basePays[key] = toSafeNumber(document.getElementById('base-pay').value); saveData(); updateSalary(); } };
     const saveRegularPayCheckSetting = () => { const key = getCurrentActivePeriodKey(); if (key) { USER_DATA.settings.regularPayChecks[key] = document.getElementById('regular-pay-check').checked; saveData(); updateSalary(); } };
 
-    // 1월 분할 저장
     const saveSplitBasePaySetting = () => {
         const key = getCurrentActivePeriodKey();
         if (key) {
             if (currentJanTab === 'prev') {
-                const val = Number(document.getElementById('base-pay-prev').value) || 0;
+                const val = toSafeNumber(document.getElementById('base-pay-prev').value);
                 USER_DATA.settings.prevYearBasePays[key] = val;
             } else if (currentJanTab === 'curr') {
-                const val = Number(document.getElementById('base-pay-curr').value) || 0;
+                const val = toSafeNumber(document.getElementById('base-pay-curr').value);
                 USER_DATA.settings.basePays[key] = val;
             }
             saveData();
@@ -929,53 +921,46 @@
 
     const saveSettings = () => { USER_DATA.class = document.getElementById('setting-class').value; saveData(); generateCalendar(); };
     const addOvertimeSettingItem = (name = '', time = 0.5) => { const container = document.getElementById('overtime-list-container'); const div = document.createElement('div'); let timeOptions = ''; for (let i = 0; i <= 10; i += 0.5) timeOptions += `<option value="${i}" ${i === time ? 'selected' : ''}>${i.toFixed(1)}h</option>`; div.innerHTML = `<input type="text" placeholder="잔업 이름" value="${name}" oninput="saveOvertimeSettings()"><select onchange="saveOvertimeSettings()">${timeOptions}</select><button onclick="this.parentNode.remove(); saveOvertimeSettings(); playSound('delete');" style="background: none; border: none; color: var(--color-error); padding: 5px; font-size: 1.2em;">&times;</button>`; container.appendChild(div); };
-    const saveOvertimeSettings = () => { const list = []; document.querySelectorAll('#overtime-list-container > div').forEach(div => { const name = div.querySelector('input[type="text"]').value; const time = Number(div.querySelector('select').value); if (name) list.push({ name, time }); }); USER_DATA.settings.overtimeList = list; saveData(); };
+    const saveOvertimeSettings = () => { const list = []; document.querySelectorAll('#overtime-list-container > div').forEach(div => { const name = div.querySelector('input[type="text"]').value; const time = toSafeNumber(div.querySelector('select').value); if (name) list.push({ name, time }); }); USER_DATA.settings.overtimeList = list; saveData(); };
 
-    // --- Work Record Modal & Others ---
     const switchTab = (tabName) => { document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active')); document.getElementById(`tab-content-${tabName}`).style.display = 'block'; document.getElementById(`tab-${tabName}`).classList.add('active'); if (tabName === 'statistics') { populateStatsFilter(); renderStatistics(); } else if (tabName === 'calendar') { loadPeriodSettingsToUI(); } };
     const closeModal = (modalId) => document.getElementById(modalId).style.display = 'none';
     
-    // showConfirm 함수 수정: onlyOk 매개변수 추가 및 기능 개선
     const showConfirm = (title, text, onOk, onlyOk = false) => {
         const modal = document.getElementById('confirm-modal');
         document.getElementById('confirm-modal-title').textContent = title;
-        // 팝업 메시지는 줄바꿈을 허용 (white-space: pre-wrap; 스타일로 처리)
         document.getElementById('confirm-modal-text').textContent = text; 
 
         const okBtn = document.getElementById('confirm-modal-ok');
         const cancelBtn = document.getElementById('confirm-modal-cancel');
         
         cancelBtn.style.display = onlyOk ? 'none' : 'inline-block';
-        okBtn.textContent = onlyOk ? '확인' : '확인'; // 텍스트를 '확인'으로 통일
+        okBtn.textContent = onlyOk ? '확인' : '확인'; 
 
         const close = () => {
             modal.style.display = 'none';
-            // 이벤트 리스너가 중복해서 쌓이는 것을 방지하기 위해 이전에 할당된 리스너를 제거 (클린업)
             okBtn.onclick = null;
             cancelBtn.onclick = null;
         };
         const okWithSoundListener = () => { onOk(); close(); playSound('save'); };
         const cancelWithSoundListener = () => { close(); playSound('click'); };
 
-        // 새로운 이벤트 리스너 할당 (클린하게 처리)
         okBtn.onclick = okWithSoundListener;
         if (!onlyOk) {
             cancelBtn.onclick = cancelWithSoundListener;
         } else {
-            // onlyOk 모드일 때 취소 버튼 역할은 닫기
             cancelBtn.onclick = cancelWithSoundListener;
         }
         
         modal.style.display = 'flex';
     };
     
-    // [수정됨] 관리자 공지 팝업 로직
     const checkAdminNotice = () => {
-        if (!ADMIN_NOTICE_CONTENT) return; // 내용이 없으면 중단
+        if (!ADMIN_NOTICE_CONTENT) return; 
 
         const hideUntil = localStorage.getItem('smartSalaryApp_admin_notice_hide_until');
         if (hideUntil && new Date().getTime() < Number(hideUntil)) {
-            return; // 숨김 기간이 아직 안 지났으면 중단
+            return; 
         }
 
         document.getElementById('admin-notice-text').textContent = ADMIN_NOTICE_CONTENT;
@@ -984,28 +969,24 @@
 
     const closeAdminNotice = (hideForWeek) => {
         if (hideForWeek) {
-            // 7일 후의 타임스탬프 계산
             const nextWeek = new Date().getTime() + (7 * 24 * 60 * 60 * 1000);
             localStorage.setItem('smartSalaryApp_admin_notice_hide_until', nextWeek);
         }
         closeModal('admin-notice-modal');
     };
     
-    // ------------------------------------
-
     const resetAllData = () => showConfirm('데이터 초기화', '경고: 모든 저장된 데이터를 영구적으로 삭제하고 초기화하시겠습니까?', () => { localStorage.removeItem('smartSalaryApp_user_data'); window.location.reload(); }); 
     const backupData = () => { const dataStr = JSON.stringify(USER_DATA); const blob = new Blob([dataStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `smartSalaryApp_backup_${formatDate(new Date())}.json`; a.click(); URL.revokeObjectURL(a.href); };
     const restoreData = (event) => { const file = event.target.files[0]; if (!file) return; showConfirm('데이터 복구', '현재 데이터를 덮어쓰고 복구하시겠습니까?', () => { const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (!data.account) throw new Error("Invalid data"); localStorage.setItem('smartSalaryApp_user_data', JSON.stringify(data)); window.location.reload(); } catch (err) { alert('복구 실패: 잘못된 파일입니다.'); } }; reader.readAsText(file); }); event.target.value = ''; };
 
     const toggleSalaryDetails = () => { const collapsed = document.getElementById('salary-input-section').classList.toggle('collapsed'); document.getElementById('salary-details-container').classList.toggle('collapsed'); document.getElementById('toggle-salary-details').textContent = collapsed ? '▲' : '▼'; USER_DATA.settings.isSalaryDetailsCollapsed = collapsed; saveData(); };
-    const copyPreviousMonthBasePay = () => { const prevKey = getPreviousPeriodKey(getCurrentActivePeriodKey()); const prevPay = USER_DATA.settings.basePays[prevKey] || 0; 
-        // 1월일 경우 복사 로직
+    const copyPreviousMonthBasePay = () => { const prevKey = getPreviousPeriodKey(getCurrentActivePeriodKey()); const prevPay = toSafeNumber(USER_DATA.settings.basePays[prevKey]); 
         const currentKey = getCurrentActivePeriodKey();
         if (currentKey.endsWith('-12')) {
             if (currentJanTab === 'prev') {
                 if (prevPay > 0) { document.getElementById('base-pay-prev').value = prevPay; saveSplitBasePaySetting(); }
             } else {
-                 const prevJanPart = USER_DATA.settings.prevYearBasePays[currentKey] || 0;
+                 const prevJanPart = toSafeNumber(USER_DATA.settings.prevYearBasePays[currentKey]);
                  if (prevJanPart > 0) { document.getElementById('base-pay-curr').value = prevJanPart; saveSplitBasePaySetting(); }
             }
         } else {
@@ -1013,30 +994,23 @@
         }
     };
     
-    // [FIXED] 1월 분할에 따른 추가 수당 복사 로직 개선
     const copyPreviousMonthAdditionalItems = () => { 
         const currentKey = getCurrentActivePeriodKey(); if (!currentKey) return; 
         const prevKey = getPreviousPeriodKey(currentKey); if (!prevKey) return; 
         
-        // 어디서 복사해올지, 어디로 복사할지 결정
         let sourceItems = [];
         let targetKey = currentKey;
         let isPrevTarget = false;
 
-        // 1월 분할 탭 로직 적용
         if (currentKey.endsWith('-12') && currentJanTab === 'prev') {
-            // 전년도(12월) 데이터 -> 1월의 '전년도 구간'으로 복사
             sourceItems = USER_DATA.settings.additionalItemsByPeriod[prevKey];
             isPrevTarget = true;
         } else if (currentKey.endsWith('-12') && currentJanTab === 'curr') {
-             // 1월의 '전년도 구간' 데이터 -> 1월의 '신년도 구간'으로 복사 (연속성)
             sourceItems = USER_DATA.settings.prevYearAdditionalItemsByPeriod[currentKey];
             if (!sourceItems || sourceItems.length === 0) {
-                 // 없다면 작년 12월꺼라도
                  sourceItems = USER_DATA.settings.additionalItemsByPeriod[prevKey];
             }
         } else {
-            // 평달: 이전달 -> 이번달
              sourceItems = USER_DATA.settings.additionalItemsByPeriod[prevKey];
         }
 
@@ -1048,7 +1022,6 @@
                  USER_DATA.settings.additionalItemsByPeriod[targetKey] = newItems;
             }
             saveData(); 
-            // 탭 상태에 맞춰 다시 렌더링
             renderAdditionalItems(targetKey, isPrevTarget ? 'prev' : 'curr'); 
             updateSalary(); 
         } else { 
@@ -1058,7 +1031,6 @@
 
     const addAdditionalItem = (n = '', a = '') => { const c = document.getElementById('additional-items-list'); const d = document.createElement('div'); d.innerHTML = `<input type="text" placeholder="수당 이름" value="${n}" oninput="saveAdditionalItems()"><input type="number" inputmode="decimal" placeholder="금액" value="${a}" oninput="saveAdditionalItems()" style="flex: 1;"><button onclick="toggleSign(this.previousElementSibling); playSound('click');" style="background-color: var(--color-disabled); color: var(--color-bg); border: 1px solid var(--color-border); border-radius: 4px; font-weight: bold; width: 40px; height: 34px; margin-left: 5px; cursor: pointer; flex: 0 0 40px; padding: 0;">+/-</button><button onclick="this.parentNode.remove(); saveAdditionalItems(); playSound('delete');" style="background: none; border: none; color: var(--color-error); padding: 5px; font-size: 1.2em; flex: 0 0 30px;">&times;</button>`; c.appendChild(d); };
     
-    // [FIXED] 렌더링 시 context (prev/curr) 구분
     const renderAdditionalItems = (key, context = 'curr') => { 
         const c = document.getElementById('additional-items-list'); c.innerHTML = ''; 
         let items = [];
@@ -1072,14 +1044,13 @@
         items.forEach(i => addAdditionalItem(i.name, i.amount)); 
     };
 
-    // [FIXED] 저장 시 현재 탭 상태 확인하여 구분 저장
     const saveAdditionalItems = () => { 
         const key = getCurrentActivePeriodKey(); if (!key) return; 
         const items = []; 
         document.querySelectorAll('#additional-items-list > div').forEach(d => { 
             const inputs = d.querySelectorAll('input'); 
             const n = inputs[0].value; 
-            const a = Number(inputs[1].value); 
+            const a = toSafeNumber(inputs[1].value); 
             if (n) items.push({ name: n, amount: a }); 
         }); 
         
@@ -1090,25 +1061,22 @@
         }
         saveData(); updateSalary(); 
     };
-    const toggleSign = (inputElement) => { if (!inputElement || inputElement.value === '') return; inputElement.value = Number(inputElement.value) * -1; inputElement.dispatchEvent(new Event('input', { bubbles: true })); };
+    const toggleSign = (inputElement) => { if (!inputElement || inputElement.value === '') return; inputElement.value = toSafeNumber(inputElement.value) * -1; inputElement.dispatchEvent(new Event('input', { bubbles: true })); };
 
     const populateStatsFilter = () => { const yf = document.getElementById('stats-year-filter'); const years = new Set(); Object.keys(USER_DATA.settings.basePays).forEach(k => years.add(k.substring(0, 4))); Object.keys(USER_DATA.workRecords).forEach(d => years.add(d.substring(0, 4))); years.add(new Date().getFullYear().toString()); const sorted = Array.from(years).sort((a, b) => b - a); yf.innerHTML = '<option value="all">전체 년도</option>'; sorted.forEach(y => yf.innerHTML += `<option value="${y}">${y}년</option>`); yf.value = new Date().getFullYear(); };
     
-    // [수정됨] 통계 보기 모드 및 상단 대시보드 합계 계산 적용
     const renderStatistics = () => { 
         const yVal = document.getElementById('stats-year-filter').value;
         const mVal = Number(document.getElementById('stats-month-filter').value);
-        const viewMode = document.getElementById('stats-view-mode').value; // 보기 모드 값 가져오기
+        const viewMode = document.getElementById('stats-view-mode').value; 
         const tb = document.getElementById('stats-table-body'); 
         tb.innerHTML = ''; 
         let years = yVal === 'all' ? Array.from(document.getElementById('stats-year-filter').options).map(o => o.value).filter(v => v !== 'all') : [yVal]; 
         
-        // 전체 합계 변수 초기화
-        let totalNet = 0; // 실수령액 (최종)
-        let totalGross = 0; // 지급 총액 (세전)
-        let totalDeduct = 0; // 공제 총액 (마이너스)
+        let totalNet = 0; 
+        let totalGross = 0; 
+        let totalDeduct = 0; 
         
-        // 테이블 헤더 변경
         const thead = document.querySelector('.stats-table thead tr');
         let headerLabel = '실수령액';
         if (viewMode === 'work') headerLabel = '근무 현황';
@@ -1125,23 +1093,16 @@
                 const key = `${targetYear}-${String(targetKeyMonth).padStart(2, '0')}`;
                 const s = calculatePeriodStats(key); 
 
-                // 데이터가 존재하는 달만 표시
                 if (s.totalSalary !== 0 || s.basePay !== 0) { 
-                    // 합계 누적 (s.totalDeductions는 음수 값이므로 절댓값으로 처리하지 않고 그대로 더하면 줄어드니 주의)
-                    // 여기서는 '공제 총액'을 양수 개념으로 보여줄지 음수로 보여줄지에 따라 다름.
-                    // 통상적으로 공제액은 "얼마 뗐다" 표현하므로 마이너스 부호와 함께 합산.
-                    
                     totalNet += s.totalSalary;
                     
-                    // 지급 총액 = 기본급 + 잔업수당 + (양수 추가수당)
                     const monthGross = s.basePay + s.totalOvertimePay + s.totalAllowances;
                     totalGross += monthGross;
                     
-                    totalDeduct += s.totalDeductions; // s.totalDeductions는 이미 음수값임
+                    totalDeduct += s.totalDeductions;
                     
                     const rowId = `stats-row-${key}`;
                     
-                    // 상세 내역 구하기
                     let items = [...(USER_DATA.settings.additionalItemsByPeriod[key] || [])];
                     if (key.endsWith('-12')) {
                         items = [...items, ...(USER_DATA.settings.prevYearAdditionalItemsByPeriod[key] || [])];
@@ -1162,18 +1123,15 @@
                     if(!allowanceListHtml) allowanceListHtml = '<div class="detail-list-item" style="color:#aaa;">없음</div>';
                     if(!deductionListHtml) deductionListHtml = '<div class="detail-list-item" style="color:#aaa;">없음</div>';
 
-                    // [수정됨] 보기 모드에 따라 표시할 값 결정
                     let displayValue = '';
                     if (viewMode === 'salary') {
                         displayValue = `${Math.round(s.totalSalary).toLocaleString()} 원`;
                     } else if (viewMode === 'work') {
-                        // 모바일 화면 공간 고려하여 간략 표시
                         displayValue = `<span style="font-size:0.85em; color:var(--color-text);">야간:${s.nightDays} 특근:${s.specialDays} 휴가:${s.vacationDays}</span>`;
                     } else if (viewMode === 'deduction') {
                         displayValue = `<span style="color:var(--color-error); font-weight:bold;">${Math.round(s.totalDeductions).toLocaleString()} 원</span>`;
                     }
 
-                    // 메인 행
                     tb.innerHTML += `
                         <tr class="stats-row-main" onclick="toggleStatsDetail('${rowId}'); playSound('click');">
                             <td>${y}년 ${displayMonth}월</td>
@@ -1213,18 +1171,15 @@
             } 
         }); 
         
-        // 상단 대시보드 업데이트
         document.getElementById('stats-dash-net').textContent = `${Math.round(totalNet).toLocaleString()} 원`;
         document.getElementById('stats-dash-gross').textContent = `${Math.round(totalGross).toLocaleString()} 원`;
         document.getElementById('stats-dash-deduct').textContent = `${Math.round(totalDeduct).toLocaleString()} 원`;
     };
 
-    // [추가됨] 상세 행 토글 함수
     const toggleStatsDetail = (rowId) => {
         const row = document.getElementById(rowId);
         const allRows = document.querySelectorAll('.stats-detail-row');
         
-        // 다른 열려있는 행들은 닫기 (선택사항)
         allRows.forEach(r => {
             if(r.id !== rowId) r.classList.remove('show');
         });
@@ -1268,7 +1223,7 @@
         const overtimes = [];
         document.querySelectorAll('#modal-overtime-list .overtime-input-row').forEach(row => {
             const name = row.querySelector('select').value;
-            const time = Number(row.querySelector('input[type="number"]').value);
+            const time = toSafeNumber(row.querySelector('input[type="number"]').value);
             if (name && time > 0) overtimes.push({ name, time });
         });
         USER_DATA.workRecords[dateStr] = { date: dateStr, type, overtimes };
@@ -1279,7 +1234,6 @@
 
     const scrollToTodayMonth = (id = null, isInitialLoad = false) => { const today = new Date(); const monthId = id || `month-${today.getFullYear()}-${today.getMonth()}`; const el = document.getElementById(monthId); if (el) { el.scrollIntoView({ behavior: 'auto', block: 'start' }); if (isInitialLoad) { clearTimeout(scrollTimeout); document.querySelectorAll('.calendar-month').forEach(m => m.classList.remove('active')); el.classList.add('active'); loadPeriodSettingsToUI(); } else { setTimeout(() => updateActiveMonth(), 50); } } };
     
-    // [FIXED] 안드로이드 Webview 충돌 방지: AudioContext 예외 처리 강화
     const playSound = (type = 'click') => { 
         if (USER_DATA.settings.isMuted) return; 
         try { 
@@ -1289,7 +1243,6 @@
             if (!audioCtx || audioCtx.state === 'closed') { 
                 audioCtx = new AudioContext(); 
             } 
-            // 안드로이드 자동재생 정책 대응: suspended 상태면 resume 시도 (실패 시 무시)
             if (audioCtx.state === 'suspended') { 
                 audioCtx.resume().catch(e => console.warn("Audio resume failed:", e));
             } 
@@ -1329,7 +1282,7 @@
         document.getElementById('today-button').addEventListener('click', () => { scrollToTodayMonth(); playSound('click'); });
         document.getElementById('work-type-group').addEventListener('change', () => document.getElementById('modal-overtime-list').innerHTML = ''); 
         loadData();
-        checkAdminNotice(); // 앱 시작 시 관리자 공지 확인
+        checkAdminNotice(); 
     });
 </script>
 </body>

@@ -21,7 +21,7 @@
     :root {
         --color-bg: #121212; --color-surface: #1E1E1E; --color-text: #E0E0E0; --color-text-secondary: #AAAAAA;
         --color-primary: #00BFFF; --color-secondary: #FF6F00; --color-error: #CF6679;
-        --color-success: #00E676; /* 추가된 성공 색상 */
+        --color-success: #00E676;
         --color-highlight: rgba(0, 191, 255, 0.15); --color-disabled: #383838; --color-border: #444444;
         --color-night-shift-dark: #2A3B4D; --shadow-elevation: 0 4px 8px rgba(0, 0, 0, 0.5); --mobile-padding: 16px;
     }
@@ -33,6 +33,40 @@
         --color-night-shift-dark: #E3F2FD; --shadow-elevation: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     body { background-color: var(--color-bg); color: var(--color-text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; width: 100%; overflow-x: hidden; position: relative; touch-action: pan-y; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
+
+    /* === [NEW] 로딩 스크린 스타일 === */
+    #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--color-bg); /* 배경색 테마 연동 */
+        z-index: 9999; /* 최상단 배치 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s ease-out; /* 부드럽게 사라짐 */
+    }
+    #loading-screen img {
+        width: 100px; /* 아이콘 크기 */
+        height: 100px;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite ease-in-out;
+        filter: drop-shadow(0 0 10px var(--color-primary)); /* 네온 효과 */
+    }
+    #loading-screen p {
+        color: var(--color-primary);
+        font-weight: bold;
+        font-size: 1.2em;
+        animation: pulse 2s infinite ease-in-out;
+    }
+    @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.8; }
+    }
 
     /* === 라이트 모드 스타일 오버라이드 === */
     :root.light-mode .day-cell { background-color: #FAFAFA; }
@@ -163,6 +197,10 @@
 </head>
 <body>
 
+<div id="loading-screen">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+CiAgPGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMjAiIHN0cm9rZT0iIzAwQkZGRiIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIiAvPgogIDxyZWN0IHg9IjIyIiB5PSIxMCIgd2lkdGg9IjYiIGhlaWdodD0iMTgiIGZpbGw9IiMwMEJGRkYiIHJ4PSIzIj4KICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiBmcm9tPSIwIDI1IDI1IiB0bz0iMzYwIDI1IDI1IiBkdXI9IjJzIiByZXBlYXRDb3VudD0iaW5pZmluaXRlIiAvPgogIDwvcmVjdD4KPC9zdmc+" alt="Loading...">
+    <p>Loading...</p>
+</div>
 <div class="app-container">
     <header class="header">
         <h1 id="app-title">GD시큐어 월급 계산</h1>
@@ -401,7 +439,7 @@
     /* === [관리자 설정 구역] === */
     // 아래 따옴표 안에 내용을 작성하면 앱 시작 시 공지 팝업이 뜹니다.
     // 내용을 비워두면("") 팝업이 뜨지 않습니다.
-    const ADMIN_NOTICE_CONTENT = "■통계부분 수정됨.\n■갤럭시 폴드 대응 코드 수정\n■앱 사용시 장애신고/문의: 010-4104-2226"; 
+    const ADMIN_NOTICE_CONTENT = "■통계부분 수정됨.\n-통계 조회 항목 리스트 변경\n-통계 상세보기 기능 추가\n\n■갤럭시폴드 버그 수정.\n\n■앱 시작시 로딩기능 추가\n\n■사용시 장애신고/문의: 010-4104-2226"; 
     
     /* === (시작) 메인 앱 스크립트 === */
     const CURRENT_APP_VERSION = "2.3.3"; // 연도 표시 범위 로직 수정 (2025~계속)
@@ -1283,6 +1321,17 @@
         document.getElementById('work-type-group').addEventListener('change', () => document.getElementById('modal-overtime-list').innerHTML = ''); 
         loadData();
         checkAdminNotice(); 
+
+        // [NEW] 로딩 화면 제어 로직 (2.5초 후 제거)
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+            setTimeout(() => {
+                loader.style.opacity = '0'; // 부드럽게 사라짐
+                setTimeout(() => {
+                    loader.remove(); // DOM에서 완전 제거
+                }, 500); // transition 시간 0.5초 대기
+            }, 2500); // 2.5초간 유지
+        }
     });
 </script>
 </body>

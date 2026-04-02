@@ -760,11 +760,11 @@
         if (isJanuary) {
             let fullMonthBasePrev = basePayPrev * (31 / 12);
             if (isRegularPayCheckedPrev) fullMonthBasePrev += REGULAR_BONUS_MONTHLY;
-            stats.prevPart.hourlyWage = fullMonthBasePrev > 0 ? fullMonthBasePrev / standardMonthlyHours : 0;
+            stats.prevPart.hourlyWage = fullMonthBasePrev > 0 ? Math.round(fullMonthBasePrev / standardMonthlyHours) : 0;
 
             let fullMonthBaseCurr = basePayCurr * (31 / 19);
             if (isRegularPayCheckedCurr) fullMonthBaseCurr += REGULAR_BONUS_MONTHLY;
-            stats.currPart.hourlyWage = fullMonthBaseCurr > 0 ? fullMonthBaseCurr / standardMonthlyHours : 0;
+            stats.currPart.hourlyWage = fullMonthBaseCurr > 0 ? Math.round(fullMonthBaseCurr / standardMonthlyHours) : 0;
 
             stats.basePay = basePayPrev + basePayCurr;
         } else {
@@ -803,8 +803,8 @@
                             targetPart.weekdayOTAmount += (totalOvertime * appliedHourlyWage * 1.5); 
                         }
                     }
-                    if (workRecord.type.includes('특근')) targetPart.specialAmount += (1 * appliedHourlyWage * 1.5 * 8); 
-                    if (workRecord.type.includes('야간')) targetPart.nightAmount += (1 * appliedHourlyWage * 0.5 * 8); 
+                    if (workRecord.type.includes('특근')) targetPart.specialAmount += (appliedHourlyWage * 1.5 * 8); 
+                    if (workRecord.type.includes('야간')) targetPart.nightAmount += (appliedHourlyWage * 0.5 * 8); 
                 }
             }
             tempDate.setDate(tempDate.getDate() + 1);
@@ -851,7 +851,7 @@
         if (!currentKey) return;
         const stats = calculatePeriodStats(currentKey);
         
-        document.getElementById('total-expected-salary').textContent = Math.floor(stats.totalSalary).toLocaleString() + ' 원';
+        document.getElementById('total-expected-salary').textContent = Math.round(stats.totalSalary).toLocaleString() + ' 원';
         
         const isJanuary = currentKey.endsWith('-12');
         let displayStats = stats;

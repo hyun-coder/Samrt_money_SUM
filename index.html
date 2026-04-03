@@ -1482,7 +1482,7 @@
 
                     let displayValue = '';
                     if (viewMode === 'salary') {
-                        displayValue = `${Math.floor(s.totalSalary).toLocaleString()} 원`;
+                        displayValue = `${Math.round(s.totalSalary).toLocaleString()} 원`;
                     } else if (viewMode === 'work') {
                         displayValue = `<span style="font-size:0.85em; color:var(--color-text);">야간:${s.nightDays} 특근:${s.specialDays} 휴가:${s.vacationDays}</span>`;
                     } else if (viewMode === 'deduction') {
@@ -1528,8 +1528,8 @@
             } 
         }); 
         
-        document.getElementById('stats-dash-net').textContent = `${Math.floor(totalNet).toLocaleString()} 원`;
-        document.getElementById('stats-dash-gross').textContent = `${Math.floor(totalGross).toLocaleString()} 원`;
+        document.getElementById('stats-dash-net').textContent = `${Math.round(totalNet).toLocaleString()} 원`;
+        document.getElementById('stats-dash-gross').textContent = `${Math.round(totalGross).toLocaleString()} 원`;
         document.getElementById('stats-dash-deduct').textContent = `${Math.floor(totalDeduct).toLocaleString()} 원`;
     };
 
